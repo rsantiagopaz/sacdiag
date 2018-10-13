@@ -1,0 +1,498 @@
+<?php
+session_start();
+
+require("Base.php");
+
+class class_Estadisticas extends class_Base
+{
+	
+	
+  public function method_leer_datos($params, $error) {
+	$p = $params[0];
+	
+	$limit = 15;
+	
+	$resultado = new stdClass;
+	
+	if (! is_null($p->variable)) {
+		if ($p->basico->opcion == 1) {
+			if ($p->variable->opcion == 2) {
+				$sql = "SELECT entregas.id_financiador, financiadores.siglas, financiadores.nombre, COUNT(*) AS cantidad";
+				$sql.= " FROM ((entregas LEFT JOIN suram.financiadores USING(id_financiador)) INNER JOIN items_entregas USING(id_entrega)) INNER JOIN productos_depositos USING(id_producto_deposito)";
+				$sql.= " WHERE entregas.estado <> 'X'";
+				if (! $p->basico->sinos) $sql.= " AND NOT ISNULL(entregas.id_financiador)";
+				if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+				$sql.= " AND productos_depositos.id_producto = " . $p->variable->model;
+				$sql.= " GROUP BY id_financiador ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				function functionAux(&$row, $key) {
+					if (is_null($row->id_financiador)) {
+						$row->descrip = "sin OS";
+					} else {
+						if (! is_null($row->siglas)) $row->siglas = trim($row->siglas);
+						$aux = ((empty($row->siglas)) ? $row->nombre . "" : $row->siglas . ", " . $row->nombre);
+						
+						$row->descrip = $aux;
+					}
+				};
+			  	
+			  	$opciones = new stdClass;
+			  	$opciones->functionAux = functionAux;
+			  	
+				$rows = $this->toJson($sql, $opciones);
+				
+			} else if ($p->variable->opcion == 3) {
+				$sql = "SELECT entregas.id_financiador, financiadores.siglas, financiadores.nombre, COUNT(*) AS cantidad";
+				$sql.= " FROM (entregas LEFT JOIN suram.financiadores USING(id_financiador)) INNER JOIN pacientes USING(id_paciente)";
+				$sql.= " WHERE entregas.estado <> 'X'";
+				if (! $p->basico->sinos) $sql.= " AND NOT ISNULL(entregas.id_financiador)";
+				if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+				$sql.= " AND pacientes.id_personal = " . $p->variable->model;
+				$sql.= " GROUP BY id_financiador ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				function functionAux(&$row, $key) {
+					if (is_null($row->id_financiador)) {
+						$row->descrip = "sin OS";
+					} else {
+						if (! is_null($row->siglas)) $row->siglas = trim($row->siglas);
+						$aux = ((empty($row->siglas)) ? $row->nombre . "" : $row->siglas . ", " . $row->nombre);
+						
+						$row->descrip = $aux;
+					}
+				};
+			  	
+			  	$opciones = new stdClass;
+			  	$opciones->functionAux = functionAux;
+			  	
+				$rows = $this->toJson($sql, $opciones);
+				
+			} else if ($p->variable->opcion == 4) {
+				$sql = "SELECT entregas.id_financiador, financiadores.siglas, financiadores.nombre, COUNT(*) AS cantidad";
+				$sql.= " FROM ((entregas LEFT JOIN suram.financiadores USING(id_financiador)) INNER JOIN pacientes USING(id_paciente)) INNER JOIN salud1._personas USING(persona_id)";
+				$sql.= " WHERE entregas.estado <> 'X'";
+				if (! $p->basico->sinos) $sql.= " AND NOT ISNULL(entregas.id_financiador)";
+				if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+				$sql.= " AND (((YEAR(CURDATE()) - YEAR(_personas.persona_fecha_nacimiento)) - (RIGHT(CURDATE(), 5) < RIGHT(_personas.persona_fecha_nacimiento, 5))) BETWEEN " . $p->variable->model . ")";
+				$sql.= " GROUP BY id_financiador ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				function functionAux(&$row, $key) {
+					if (is_null($row->id_financiador)) {
+						$row->descrip = "sin OS";
+					} else {
+						if (! is_null($row->siglas)) $row->siglas = trim($row->siglas);
+						$aux = ((empty($row->siglas)) ? $row->nombre . "" : $row->siglas . ", " . $row->nombre);
+						
+						$row->descrip = $aux;
+					}
+				};
+			  	
+			  	$opciones = new stdClass;
+			  	$opciones->functionAux = functionAux;
+			  	
+				$rows = $this->toJson($sql, $opciones);
+				
+			} else if ($p->variable->opcion == 5) {
+				$sql = "SELECT entregas.id_financiador, financiadores.siglas, financiadores.nombre, COUNT(*) AS cantidad";
+				$sql.= " FROM ((entregas LEFT JOIN suram.financiadores USING(id_financiador)) INNER JOIN pacientes USING(id_paciente)) INNER JOIN salud1._personas USING(persona_id)";
+				$sql.= " WHERE entregas.estado <> 'X'";
+				if (! $p->basico->sinos) $sql.= " AND NOT ISNULL(entregas.id_financiador)";
+				if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+				$sql.= " AND _personas.persona_sexo LIKE '" . $p->variable->model . "'";
+				$sql.= " GROUP BY id_financiador ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				function functionAux(&$row, $key) {
+					if (is_null($row->id_financiador)) {
+						$row->descrip = "sin OS";
+					} else {
+						if (! is_null($row->siglas)) $row->siglas = trim($row->siglas);
+						$aux = ((empty($row->siglas)) ? $row->nombre . "" : $row->siglas . ", " . $row->nombre);
+						
+						$row->descrip = $aux;
+					}
+				};
+			  	
+			  	$opciones = new stdClass;
+			  	$opciones->functionAux = functionAux;
+			  	
+				$rows = $this->toJson($sql, $opciones);
+				
+			}
+			
+		} else if ($p->basico->opcion == 2) {
+			if ($p->variable->opcion == 1) {
+				$sql = "SELECT productos.id_producto, CONCAT(productos.descripcion, ' | ', tipos_productos.tipo_producto) AS descrip, SUM(items_entregas.cantidad) AS cantidad";
+				$sql.= " FROM (((entregas INNER JOIN items_entregas USING(id_entrega)) INNER JOIN productos_depositos USING(id_producto_deposito)) INNER JOIN productos USING(id_producto)) INNER JOIN tipos_productos USING(id_tipo_producto)";
+				$sql.= " WHERE entregas.estado <> 'X'";
+				if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+				$sql.= ((is_null($p->variable->model)) ? " AND ISNULL(entregas.id_financiador)" : " AND entregas.id_financiador=" . $p->variable->model);
+				$sql.= " GROUP BY id_producto ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				$rows = $this->toJson($sql);
+
+			} else if ($p->variable->opcion == 3) {
+				$sql = "SELECT productos.id_producto, CONCAT(productos.descripcion, ' | ', tipos_productos.tipo_producto) AS descrip, SUM(items_entregas.cantidad) AS cantidad";
+				$sql.= " FROM ((((pacientes INNER JOIN entregas USING(id_paciente)) INNER JOIN items_entregas USING(id_entrega)) INNER JOIN productos_depositos USING(id_producto_deposito)) INNER JOIN productos USING(id_producto)) INNER JOIN tipos_productos USING(id_tipo_producto)";
+				$sql.= " WHERE entregas.estado <> 'X'";
+				if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+				$sql.= " AND pacientes.id_personal = " . $p->variable->model;
+				$sql.= " GROUP BY id_producto ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				$rows = $this->toJson($sql);
+
+			} else if ($p->variable->opcion == 4) {
+				$sql = "SELECT productos.id_producto, CONCAT(productos.descripcion, ' | ', tipos_productos.tipo_producto) AS descrip, SUM(items_entregas.cantidad) AS cantidad";
+				$sql.= " FROM (((((pacientes INNER JOIN salud1._personas USING(persona_id)) INNER JOIN entregas USING(id_paciente)) INNER JOIN items_entregas USING(id_entrega)) INNER JOIN productos_depositos USING(id_producto_deposito)) INNER JOIN productos USING(id_producto)) INNER JOIN tipos_productos USING(id_tipo_producto)";
+				$sql.= " WHERE entregas.estado <> 'X'";
+				if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+				$sql.= " AND (((YEAR(CURDATE()) - YEAR(_personas.persona_fecha_nacimiento)) - (RIGHT(CURDATE(), 5) < RIGHT(_personas.persona_fecha_nacimiento, 5))) BETWEEN " . $p->variable->model . ")";
+				$sql.= " GROUP BY id_producto ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				$rows = $this->toJson($sql);
+				
+			} else if ($p->variable->opcion == 5) {
+				$sql = "SELECT productos.id_producto, CONCAT(productos.descripcion, ' | ', tipos_productos.tipo_producto) AS descrip, SUM(items_entregas.cantidad) AS cantidad";
+				$sql.= " FROM (((((pacientes INNER JOIN salud1._personas USING(persona_id)) INNER JOIN entregas USING(id_paciente)) INNER JOIN items_entregas USING(id_entrega)) INNER JOIN productos_depositos USING(id_producto_deposito)) INNER JOIN productos USING(id_producto)) INNER JOIN tipos_productos USING(id_tipo_producto)";
+				$sql.= " WHERE entregas.estado <> 'X'";
+				if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+				$sql.= " AND _personas.persona_sexo LIKE '" . $p->variable->model . "'";
+				$sql.= " GROUP BY id_producto ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				$rows = $this->toJson($sql);
+			
+			}
+			
+		} else if ($p->basico->opcion == 3) {
+			if ($p->variable->opcion == 1) {
+				$sql = "SELECT pacientes.id_personal, _personal.apenom AS descrip, COUNT(*) AS cantidad";
+				$sql.= " FROM (pacientes INNER JOIN salud1._personal USING(id_personal)) INNER JOIN entregas USING(id_paciente)";
+				$sql.= " WHERE entregas.estado <> 'X'";
+				if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+				$sql.= ((is_null($p->variable->model)) ? " AND ISNULL(entregas.id_financiador)" : " AND entregas.id_financiador=" . $p->variable->model);
+				$sql.= " GROUP BY id_personal ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				$rows = $this->toJson($sql);
+				
+			} else if ($p->variable->opcion == 2) {
+				$sql = "SELECT pacientes.id_personal, _personal.apenom AS descrip, COUNT(*) AS cantidad";
+				$sql.= " FROM (((pacientes INNER JOIN salud1._personal USING(id_personal)) INNER JOIN entregas USING(id_paciente)) INNER JOIN items_entregas USING(id_entrega)) INNER JOIN productos_depositos USING(id_producto_deposito)";
+				$sql.= " WHERE entregas.estado <> 'X'";
+				if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+				$sql.= " AND productos_depositos.id_producto = " . $p->variable->model;
+				
+				$sql.= " GROUP BY id_personal ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				$rows = $this->toJson($sql);
+				
+			} else if ($p->variable->opcion == 4) {
+				$sql = "SELECT pacientes.id_personal, _personal.apenom AS descrip, COUNT(*) AS cantidad";
+				$sql.= " FROM (pacientes INNER JOIN salud1._personal USING(id_personal)) INNER JOIN salud1._personas USING(persona_id)";
+				$sql.= " WHERE TRUE";
+				$sql.= " AND (((YEAR(CURDATE()) - YEAR(_personas.persona_fecha_nacimiento)) - (RIGHT(CURDATE(), 5) < RIGHT(_personas.persona_fecha_nacimiento, 5))) BETWEEN " . $p->variable->model . ")";
+				$sql.= " GROUP BY id_personal ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				$rows = $this->toJson($sql);
+				
+			} else if ($p->variable->opcion == 5) {
+				$sql = "SELECT pacientes.id_personal, _personal.apenom AS descrip, COUNT(*) AS cantidad";
+				$sql.= " FROM (pacientes INNER JOIN salud1._personal USING(id_personal)) INNER JOIN salud1._personas USING(persona_id)";
+				$sql.= " WHERE TRUE";
+				$sql.= " AND _personas.persona_sexo LIKE '" . $p->variable->model . "'";
+				$sql.= " GROUP BY id_personal ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				$rows = $this->toJson($sql);
+			
+			}
+			
+		} else if ($p->basico->opcion == 4) {
+			if ($p->variable->opcion == 1) {
+				$rows = array();
+				$rows[] = array("0 - 15 años", "0 AND 15");
+				$rows[] = array("16 - 25 años", "16 AND 25");
+				$rows[] = array("26 - 30 años", "26 AND 30");
+				$rows[] = array("31 - 45 años", "31 AND 45");
+				$rows[] = array("46 - 60 años", "46 AND 60");
+				$rows[] = array("61 - 75 años", "61 AND 75");
+				$rows[] = array("76 - 90 años", "76 AND 90");
+				$rows[] = array("91 - 105 años", "91 AND 105");
+				
+				foreach ($rows as $key => $value) {
+					$sql = "(SELECT '" . $value[0] . "' AS descrip, COUNT(*) AS cantidad";
+					$sql.= " FROM (pacientes INNER JOIN salud1._personas USING(persona_id)) INNER JOIN entregas USING(id_paciente)";
+					$sql.= " WHERE entregas.estado <> 'X'";
+					$sql.= " AND (((YEAR(CURDATE()) - YEAR(_personas.persona_fecha_nacimiento)) - (RIGHT(CURDATE(), 5) < RIGHT(_personas.persona_fecha_nacimiento, 5))) BETWEEN " . $value[1] . ")";
+					if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+					$sql.= ((is_null($p->variable->model)) ? " AND ISNULL(entregas.id_financiador)" : " AND entregas.id_financiador=" . $p->variable->model);
+					$sql.= " GROUP BY descrip)";
+					$rows[$key] = $sql;
+				}
+				
+				$sql = implode(" UNION ALL ", $rows);
+				$sql.= " ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				$rows = $this->toJson($sql);
+
+			} else if ($p->variable->opcion == 2) {
+				$rows = array();
+				$rows[] = array("0 - 15 años", "0 AND 15");
+				$rows[] = array("16 - 25 años", "16 AND 25");
+				$rows[] = array("26 - 30 años", "26 AND 30");
+				$rows[] = array("31 - 45 años", "31 AND 45");
+				$rows[] = array("46 - 60 años", "46 AND 60");
+				$rows[] = array("61 - 75 años", "61 AND 75");
+				$rows[] = array("76 - 90 años", "76 AND 90");
+				$rows[] = array("91 - 105 años", "91 AND 105");
+				
+				foreach ($rows as $key => $value) {
+					$sql = "(SELECT '" . $value[0] . "' AS descrip, COUNT(*) AS cantidad";
+					$sql.= " FROM (((pacientes INNER JOIN salud1._personas USING(persona_id)) INNER JOIN entregas USING(id_paciente)) INNER JOIN items_entregas USING(id_entrega)) INNER JOIN productos_depositos USING(id_producto_deposito)";
+					$sql.= " WHERE entregas.estado <> 'X'";
+					$sql.= " AND (((YEAR(CURDATE()) - YEAR(_personas.persona_fecha_nacimiento)) - (RIGHT(CURDATE(), 5) < RIGHT(_personas.persona_fecha_nacimiento, 5))) BETWEEN " . $value[1] . ")";
+					if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+					$sql.= " AND productos_depositos.id_producto = " . $p->variable->model;
+					$sql.= " GROUP BY descrip)";
+					$rows[$key] = $sql;
+				}
+				
+				$sql = implode(" UNION ALL ", $rows);
+				$sql.= " ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				$rows = $this->toJson($sql);
+				
+			} else if ($p->variable->opcion == 3) {
+				$rows = array();
+				$rows[] = array("0 - 15 años", "0 AND 15");
+				$rows[] = array("16 - 25 años", "16 AND 25");
+				$rows[] = array("26 - 30 años", "26 AND 30");
+				$rows[] = array("31 - 45 años", "31 AND 45");
+				$rows[] = array("46 - 60 años", "46 AND 60");
+				$rows[] = array("61 - 75 años", "61 AND 75");
+				$rows[] = array("76 - 90 años", "76 AND 90");
+				$rows[] = array("91 - 105 años", "91 AND 105");
+				
+				foreach ($rows as $key => $value) {
+					$sql = "(SELECT '" . $value[0] . "' AS descrip, COUNT(*) AS cantidad";
+					$sql.= " FROM pacientes INNER JOIN salud1._personas USING(persona_id)";
+					$sql.= " WHERE (((YEAR(CURDATE()) - YEAR(_personas.persona_fecha_nacimiento)) - (RIGHT(CURDATE(), 5) < RIGHT(_personas.persona_fecha_nacimiento, 5))) BETWEEN " . $value[1] . ")";
+					$sql.= " AND pacientes.id_personal = " . $p->variable->model;
+					$sql.= " GROUP BY descrip)";
+					$rows[$key] = $sql;
+				}
+				
+				$sql = implode(" UNION ALL ", $rows);
+				$sql.= " ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				$rows = $this->toJson($sql);
+				
+			} else if ($p->variable->opcion == 5) {
+				$rows = array();
+				$rows[] = array("0 - 15 años", "0 AND 15");
+				$rows[] = array("16 - 25 años", "16 AND 25");
+				$rows[] = array("26 - 30 años", "26 AND 30");
+				$rows[] = array("31 - 45 años", "31 AND 45");
+				$rows[] = array("46 - 60 años", "46 AND 60");
+				$rows[] = array("61 - 75 años", "61 AND 75");
+				$rows[] = array("76 - 90 años", "76 AND 90");
+				$rows[] = array("91 - 105 años", "91 AND 105");
+				
+				foreach ($rows as $key => $value) {
+					$sql = "(SELECT '" . $value[0] . "' AS descrip, COUNT(*) AS cantidad";
+					$sql.= " FROM pacientes INNER JOIN salud1._personas USING(persona_id)";
+					$sql.= " WHERE (((YEAR(CURDATE()) - YEAR(_personas.persona_fecha_nacimiento)) - (RIGHT(CURDATE(), 5) < RIGHT(_personas.persona_fecha_nacimiento, 5))) BETWEEN " . $value[1] . ")";
+					$sql.= " AND _personas.persona_sexo LIKE '" . $p->variable->model . "'";
+					$sql.= " GROUP BY descrip)";
+					$rows[$key] = $sql;
+				}
+				
+				$sql = implode(" UNION ALL ", $rows);
+				$sql.= " ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				$rows = $this->toJson($sql);
+				
+			}
+			
+		} else if ($p->basico->opcion == 5) {
+			if ($p->variable->opcion == 1) {
+				$sql = "SELECT _personas.persona_sexo, COUNT(*) AS cantidad";
+				$sql.= " FROM (pacientes INNER JOIN salud1._personas USING(persona_id)) INNER JOIN entregas USING(id_paciente)";
+				$sql.= " WHERE (_personas.persona_sexo LIKE 'F' OR _personas.persona_sexo LIKE 'M')";
+				$sql.= " AND entregas.estado <> 'X'";
+				if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+				$sql.= ((is_null($p->variable->model)) ? " AND ISNULL(entregas.id_financiador)" : " AND entregas.id_financiador=" . $p->variable->model);
+				$sql.= " GROUP BY persona_sexo ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				function functionAux(&$row, $key) {
+					$row->descrip = (($row->persona_sexo == "F") ? "Femenino" : "Masculino");
+				};
+			  	
+			  	$opciones = new stdClass;
+			  	$opciones->functionAux = functionAux;
+			  	
+				$rows = $this->toJson($sql, $opciones);
+				
+			} else if ($p->variable->opcion == 2) {
+				$sql = "SELECT _personas.persona_sexo, COUNT(*) AS cantidad";
+				$sql.= " FROM (((pacientes INNER JOIN salud1._personas USING(persona_id)) INNER JOIN entregas USING(id_paciente)) INNER JOIN items_entregas USING(id_entrega)) INNER JOIN productos_depositos USING(id_producto_deposito)";
+				$sql.= " WHERE (_personas.persona_sexo LIKE 'F' OR _personas.persona_sexo LIKE 'M')";
+				$sql.= " AND entregas.estado <> 'X'";
+				if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+				$sql.= " AND productos_depositos.id_producto = " . $p->variable->model;
+				$sql.= " GROUP BY persona_sexo ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				function functionAux(&$row, $key) {
+					$row->descrip = (($row->persona_sexo == "F") ? "Femenino" : "Masculino");
+				};
+			  	
+			  	$opciones = new stdClass;
+			  	$opciones->functionAux = functionAux;
+			  	
+				$rows = $this->toJson($sql, $opciones);
+				
+			} else if ($p->variable->opcion == 3) {
+				$sql = "SELECT _personas.persona_sexo, COUNT(*) AS cantidad";
+				$sql.= " FROM pacientes INNER JOIN salud1._personas USING(persona_id)";
+				$sql.= " WHERE (_personas.persona_sexo LIKE 'F' OR _personas.persona_sexo LIKE 'M')";
+				$sql.= " AND pacientes.id_personal = " . $p->variable->model;
+				$sql.= " GROUP BY persona_sexo ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				function functionAux(&$row, $key) {
+					$row->descrip = (($row->persona_sexo == "F") ? "Femenino" : "Masculino");
+				};
+			  	
+			  	$opciones = new stdClass;
+			  	$opciones->functionAux = functionAux;
+			  	
+				$rows = $this->toJson($sql, $opciones);
+				
+			} else if ($p->variable->opcion == 4) {
+				$sql = "SELECT _personas.persona_sexo, COUNT(*) AS cantidad";
+				$sql.= " FROM pacientes INNER JOIN salud1._personas USING(persona_id)";
+				$sql.= " WHERE (_personas.persona_sexo LIKE 'F' OR _personas.persona_sexo LIKE 'M')";
+				$sql.= " AND (((YEAR(CURDATE()) - YEAR(_personas.persona_fecha_nacimiento)) - (RIGHT(CURDATE(), 5) < RIGHT(_personas.persona_fecha_nacimiento, 5))) BETWEEN " . $p->variable->model . ")";
+				$sql.= " GROUP BY persona_sexo ORDER BY cantidad DESC LIMIT " . $limit;
+				
+				function functionAux(&$row, $key) {
+					$row->descrip = (($row->persona_sexo == "F") ? "Femenino" : "Masculino");
+				};
+			  	
+			  	$opciones = new stdClass;
+			  	$opciones->functionAux = functionAux;
+			  	
+				$rows = $this->toJson($sql, $opciones);
+				
+			}
+			
+		}
+		
+	} else {
+		if ($p->basico->opcion == 1) {
+			$sql = "SELECT entregas.id_financiador, financiadores.siglas, financiadores.nombre, COUNT(*) AS cantidad";
+			$sql.= " FROM entregas LEFT JOIN suram.financiadores USING(id_financiador)";
+			$sql.= " WHERE entregas.estado <> 'X'";
+			if (! $p->basico->sinos) $sql.= " AND NOT ISNULL(entregas.id_financiador)";
+			if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+			$sql.= " GROUP BY id_financiador ORDER BY cantidad DESC LIMIT " . $limit;
+			
+			function functionAux(&$row, $key) {
+				if (is_null($row->id_financiador)) {
+					$row->descrip = "sin OS";
+				} else {
+					if (! is_null($row->siglas)) $row->siglas = trim($row->siglas);
+					$aux = ((empty($row->siglas)) ? $row->nombre . "" : $row->siglas . ", " . $row->nombre);
+					
+					$row->descrip = $aux;
+				}
+			};
+		  	
+		  	$opciones = new stdClass;
+		  	$opciones->functionAux = functionAux;
+		  	
+			$rows = $this->toJson($sql, $opciones);
+			
+		} else if ($p->basico->opcion == 2) {
+			$sql = "SELECT productos.id_producto, CONCAT(productos.descripcion, ' | ', tipos_productos.tipo_producto) AS descrip, SUM(items_entregas.cantidad) AS cantidad";
+			$sql.= " FROM (((entregas INNER JOIN items_entregas USING(id_entrega)) INNER JOIN productos_depositos USING(id_producto_deposito)) INNER JOIN productos USING(id_producto)) INNER JOIN tipos_productos USING(id_tipo_producto)";
+			$sql.= " WHERE entregas.estado <> 'X'";
+			if (! is_null($p->fecha)) $sql.= " AND (entregas.fecha BETWEEN '" . $p->fecha->desde . "' AND '" . $p->fecha->hasta . "')";
+			$sql.= " GROUP BY id_producto ORDER BY cantidad DESC LIMIT " . $limit;
+			
+			$rows = $this->toJson($sql);
+			
+		} else if ($p->basico->opcion == 3) {
+			$sql = "SELECT pacientes.id_personal, _personal.apenom AS descrip, COUNT(*) AS cantidad";
+			$sql.= " FROM pacientes INNER JOIN salud1._personal USING(id_personal)";
+			$sql.= " GROUP BY id_personal ORDER BY cantidad DESC LIMIT " . $limit;
+			
+			$rows = $this->toJson($sql);
+			
+		} else if ($p->basico->opcion == 4) {
+			$rows = array();
+			$rows[] = array("0 - 15 años", "0 AND 15");
+			$rows[] = array("16 - 25 años", "16 AND 25");
+			$rows[] = array("26 - 30 años", "26 AND 30");
+			$rows[] = array("31 - 45 años", "31 AND 45");
+			$rows[] = array("46 - 60 años", "46 AND 60");
+			$rows[] = array("61 - 75 años", "61 AND 75");
+			$rows[] = array("76 - 90 años", "76 AND 90");
+			$rows[] = array("91 - 105 años", "91 AND 105");
+			
+			foreach ($rows as $key => $value) {
+				$sql = "(SELECT '" . $value[0] . "' AS descrip, COUNT(*) AS cantidad";
+				$sql.= " FROM pacientes INNER JOIN salud1._personas USING(persona_id)";
+				$sql.= " WHERE (((YEAR(CURDATE()) - YEAR(_personas.persona_fecha_nacimiento)) - (RIGHT(CURDATE(), 5) < RIGHT(_personas.persona_fecha_nacimiento, 5))) BETWEEN " . $value[1] . ")";
+				$sql.= " GROUP BY descrip)";
+				$rows[$key] = $sql;
+			}
+			
+			$sql = implode(" UNION ALL ", $rows);
+			$sql.= " ORDER BY cantidad DESC LIMIT " . $limit;
+			
+			$rows = $this->toJson($sql);
+			
+		} else if ($p->basico->opcion == 5) {
+			$sql = "SELECT _personas.persona_sexo, COUNT(*) AS cantidad";
+			$sql.= " FROM pacientes INNER JOIN salud1._personas USING(persona_id)";
+			$sql.= " WHERE (_personas.persona_sexo LIKE 'F' OR _personas.persona_sexo LIKE 'M')";
+			$sql.= " GROUP BY persona_sexo ORDER BY cantidad DESC LIMIT " . $limit;
+			
+			function functionAux(&$row, $key) {
+				$row->descrip = (($row->persona_sexo == "F") ? "Femenino" : "Masculino");
+			};
+		  	
+		  	$opciones = new stdClass;
+		  	$opciones->functionAux = functionAux;
+		  	
+			$rows = $this->toJson($sql, $opciones);
+
+		}
+	}
+	
+	if ($p->grafico == "torta") {
+		$dataSeries = array();
+		foreach ($rows as $row) {
+			$dataSeries[] = array($row->descrip, (int) $row->cantidad);
+		}
+		
+		$resultado->dataSeries = array($dataSeries);
+
+	} else {
+		$dataSeries = array();
+		$series = array();
+		foreach ($rows as $row) {
+			$dataSeries[] = array((int) $row->cantidad);
+			
+			$aux = new stdClass;
+			$aux->label = $row->descrip;
+			$series[] = $aux;
+		}
+		
+		$resultado->dataSeries = $dataSeries;
+		$resultado->series = $series;
+	}
+	
+	return $resultado;
+  }
+  
+  
+}
+
+?>
