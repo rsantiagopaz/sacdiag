@@ -101,11 +101,7 @@ qx.Class.define("servicio_social.Application",
 	
 
 	
-	var pagePanelDeEstudiosEnProceso;
-	var pageControlDePrefacturaciones;
-	var pageABMprestaciones;
-	var pageABMprestadores;
-	var pageParametros;
+	var pagesMain = this.pagesMain = {};
 
 	
 	
@@ -125,7 +121,6 @@ qx.Class.define("servicio_social.Application",
 	numberformatEntero.setMinimumFractionDigits(0);
 	
 	
-	var loading = this.loading = new componente.comp.ui.ramon.image.Loading("servicio_social/loading66.gif");
       
 
 	var contenedorMain = new qx.ui.container.Composite(new qx.ui.layout.Grow());
@@ -151,88 +146,27 @@ qx.Class.define("servicio_social.Application",
 	
 	
 	
-	var btnPanelDeEstudiosEnProceso = new qx.ui.menu.Button("Panel de Estudios en Proceso...");
-	btnPanelDeEstudiosEnProceso.addListener("execute", function(){
-		if (pagePanelDeEstudiosEnProceso == null) {
-			pagePanelDeEstudiosEnProceso = new servicio_social.comp.pagePanelDeEstudiosEnProceso();
-			pagePanelDeEstudiosEnProceso.addListenerOnce("close", function(e){
-				pagePanelDeEstudiosEnProceso = null;
+	var btnSolicitudes = new qx.ui.menu.Button("Solicitudes...");
+	btnSolicitudes.addListener("execute", function(){
+		if (pagesMain.pageSolicitudes == null) {
+			pagesMain.pageSolicitudes = new servicio_social.comp.pageSolicitudes();
+			pagesMain.pageSolicitudes.addListenerOnce("close", function(e){
+				pagesMain.pageSolicitudes = null;
 			});
-			tabviewMain.add(pagePanelDeEstudiosEnProceso);
+			tabviewMain.add(pagesMain.pageSolicitudes);
 		}
-		tabviewMain.setSelection([pagePanelDeEstudiosEnProceso]);
+		tabviewMain.setSelection([pagesMain.pageSolicitudes]);
 	});
-	mnuEdicion.add(btnPanelDeEstudiosEnProceso);
+	mnuEdicion.add(btnSolicitudes);
 	
-	
-	var btnControlDePrefacturaciones = new qx.ui.menu.Button("Control de Prefacturaciones...");
-	btnControlDePrefacturaciones.addListener("execute", function(){
-		if (pageControlDePrefacturaciones == null) {
-			pageControlDePrefacturaciones = new servicio_social.comp.pageControlDePrefacturaciones();
-			pageControlDePrefacturaciones.addListenerOnce("close", function(e){
-				pageControlDePrefacturaciones = null;
-			});
-			tabviewMain.add(pageControlDePrefacturaciones);
-		}
-		tabviewMain.setSelection([pageControlDePrefacturaciones]);
-	});
-	mnuEdicion.add(btnControlDePrefacturaciones);
-	
-	
-	mnuEdicion.addSeparator();
-	
-	
-	var btnABMPrestaciones = new qx.ui.menu.Button("ABM Prestaciones...");
-	btnABMPrestaciones.addListener("execute", function(){
-		if (pageABMprestaciones == null) {
-			pageABMprestaciones = new servicio_social.comp.pageABMprestaciones();
-			pageABMprestaciones.addListenerOnce("close", function(e){
-				pageABMprestaciones = null;
-			});
-			tabviewMain.add(pageABMprestaciones);
-		}
-		tabviewMain.setSelection([pageABMprestaciones]);
-	});
-	mnuEdicion.add(btnABMPrestaciones);
-	
-	
-	var btnABMPrestadores = new qx.ui.menu.Button("ABM Prestadores...");
-	btnABMPrestadores.addListener("execute", function(){
-		if (pageABMprestadores == null) {
-			pageABMprestadores = new servicio_social.comp.pageABMprestadores();
-			pageABMprestadores.addListenerOnce("close", function(e){
-				pageABMprestadores = null;
-			});
-			tabviewMain.add(pageABMprestadores);
-		}
-		tabviewMain.setSelection([pageABMprestadores]);
-	});
-	mnuEdicion.add(btnABMPrestadores);
-	
-	
-
-
-	
-
 	
 
 	
 	
 	
-	var mnuVer = new qx.ui.menu.Menu();
+
 	
-	var btnEstadisticas = new qx.ui.menu.Button("Estadísticas...");
-	btnEstadisticas.addListener("execute", function(){
-		if (pageParametros == null) {
-			pageParametros = new servicio_social.comp.pageParametros();
-			pageParametros.addListenerOnce("close", function(e){
-				pageParametros = null;
-			});
-			tabviewMain.add(pageParametros);
-		}
-		tabviewMain.setSelection([pageParametros]);
-	});
-	mnuVer.add(btnEstadisticas);
+	
 	
 	
 
@@ -264,20 +198,17 @@ qx.Class.define("servicio_social.Application",
 	  
 	var mnubtnArchivo = new qx.ui.toolbar.MenuButton('Archivo');
 	var mnubtnEdicion = new qx.ui.toolbar.MenuButton("Edición");
-	var mnubtnVer = new qx.ui.toolbar.MenuButton('Ver');
 	var mnubtnSesion = new qx.ui.toolbar.MenuButton('Sesión');
 
 	
 	mnubtnArchivo.setMenu(mnuArchivo);
 	mnubtnEdicion.setMenu(mnuEdicion);
-	mnubtnVer.setMenu(mnuVer);
 	mnubtnSesion.setMenu(mnuSesion);
 	  
 	
 	var toolbarMain = new qx.ui.toolbar.ToolBar();
 	toolbarMain.add(mnubtnArchivo);
-	toolbarMain.add(mnubtnEdicion);
-	toolbarMain.add(mnubtnVer);
+	//toolbarMain.add(mnubtnEdicion);
 	toolbarMain.add(mnubtnSesion);
 	toolbarMain.addSpacer();
 	
@@ -302,7 +233,7 @@ qx.Class.define("servicio_social.Application",
 	//tabviewMain.setSelection([page]);
 	
 	
-	btnPanelDeEstudiosEnProceso.execute();
+	btnSolicitudes.execute();
 	
 	}
   }

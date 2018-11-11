@@ -8,106 +8,73 @@ class class_Solicitudes extends class_Base
 {
 
 
+  public function method_alta_modifica_solicitud($params, $error) {
+	$p = $params[0];
+	
+	$p->ta_solicitud->id_usuario_emite = $_SESSION['login']->usuario;
+	
+	$set = $this->prepararCampos($p->ta_solicitud, "ta_solicitud");
+
+	$sql = "INSERT ta_solicitud SET " . $set . ", f_emite=NOW(), id_oas_usuario_emite=" . $_SESSION['login']->id_oas_usuario . ", estado='E'";
+	$this->mysqli->query($sql);
+	
+	$id_ta_solicitud = $this->mysqli->insert_id;
+	
+	foreach ($p->ta_solicitud_item as $ta_solicitud_item) {
+		$ta_solicitud_item->id_ta_solicitud = $id_ta_solicitud;
+		
+		
+		$set = $this->prepararCampos($ta_solicitud_item, "ta_solicitud_item");
+
+		$sql = "INSERT ta_solicitud_item SET " . $set;
+		$this->mysqli->query($sql);
+	}
+  }
+  
+  
   public function method_leer_solicitud($params, $error) {
 	$p = $params[0];
 	
-	$estado = array();
-	$estado["E"] = "Emitida";
-	$estado["A"] = "Aprobada";
-	$estado["B"] = "Bloqueada";
-	$estado["C"] = "Capturada";
-	$estado["L"] = "Liberada";
-	$estado["F"] = "Prefacturada";
-	$estado["P"] = "para Pago";
+	$resultado = new stdClass;
+	
+	$sql = "SELECT * FROM ta_solicitud WHERE id_ta_solicitud=" . $p->id_ta_solicitud;
+	$resultado->solicitud = $this->toJson($sql);
+	$resultado->solicitud = $resultado->solicitud[0];
+	
+	$sql = "SELECT persona_id AS model, CONCAT(TRIM(persona_nombre), ' (', persona_dni, ')') AS label, persona_tipodoc, persona_dni FROM _personas WHERE persona_id=" . $resultado->solicitud->persona_id_paciente;
+	$resultado->cboPaciente = $this->toJson($sql);
+	$resultado->cboPaciente = $resultado->cboPaciente[0];
+	
+	$sql = "SELECT id_personal AS model, TRIM(apenom) AS label FROM _personal WHERE id_personal=" . $resultado->solicitud->id_personal_medico;
+	$resultado->cboPersonal = $this->toJson($sql);
+	$resultado->cboPersonal = $resultado->cboPersonal[0];
+	
+	$sql = "SELECT id_diagnostico AS model, CONCAT(descripcion4, ' (', cod_4, ')') AS label FROM cie10 WHERE id_diagnostico=" . $resultado->solicitud->id_diagnostico;
+	$resultado->cboDiagnostico = $this->toJson($sql);
+	$resultado->cboDiagnostico = $resultado->cboDiagnostico[0];
+	
+
+
+  	$opciones = new stdClass;
+  	$opciones->cant_acompanantes = "int";
+  	$opciones->cant_dias = "int";
+  	$opciones->monto_presup = "float";
+  	
+	$sql = "SELECT ta_solicitud_item.*, CONCAT(ta_prestacion.descrip, ' - ', ta_prestacion.codigo, ' (', ta_tipo_prestacion.descrip, ')') AS prestacion, ta_establecimiento.descrip AS establecimiento FROM ta_solicitud_item INNER JOIN ta_prestacion USING(id_ta_prestacion) INNER JOIN ta_tipo_prestacion USING(id_ta_tipo_prestacion) INNER JOIN ta_establecimiento USING(id_ta_establecimiento) WHERE ta_solicitud_item.id_ta_solicitud=" . $resultado->solicitud->id_ta_solicitud;
+	$resultado->items = $this->toJson($sql, $opciones);
 	
 	
-	$resultado = array();
-	
-	$sql = "SELECT solicitudes.*, _personas.persona_nombre, _personas.persona_dni FROM solicitudes INNER JOIN _personas USING(persona_id) WHERE TRUE";
-	
-	if (! is_null($p->desde) && ! is_null($p->hasta)) {
-		$sql.= " AND (fecha_emite BETWEEN '" . substr($p->desde, 0, 10) . "' AND '" . substr($p->hasta, 0, 10) . "')";
-	} else if (! is_null($p->desde)) {
-		$sql.= " AND fecha_emite >= '" . substr($p->desde, 0, 10) . "'";
-	} else if (! is_null($p->hasta)) {
-		$sql.= " AND fecha_emite <= '" . substr($p->hasta, 0, 10) . "'";
-	}
-	
-	if (! empty($p->id_prestador_fantasia)) $sql.= " AND id_prestador_fantasia='" . $p->id_prestador_fantasia . "'";
-	if (! is_null($p->persona_id)) $sql.= " AND persona_id='" . $p->persona_id . "'";
-	if (! is_null($p->id_usuario_medico)) $sql.= " AND id_usuario_medico='" . $p->id_usuario_medico . "'";
-	if (empty($p->estado)) $sql.= " AND estado <> 'C'"; else $sql.= " AND estado='" . $p->estado . "'";
-	
-	$sql.= " ORDER BY fecha_emite DESC";
-	
-	$rs = $this->mysqli->query($sql);
-	while ($row = $rs->fetch_object()) {
-		$row->estado_descrip = $estado[$row->estado];
-		$row->anses_negativa = ($row->anses_negativa == "S") ? "Si" : "No";
-		
-		if ($row->estado=="E") {
-			$row->estado_condicion = 1;
-		} else if ($row->estado=="A") {
-			$row->estado_condicion = 2;
-		} else if ($row->estado=="B") {
-			$row->estado_condicion = 3;
-		} else {
-			$row->estado_condicion = 0;
-		}
-		
-		$sql = "SELECT organismo_area FROM _organismos_areas WHERE organismo_area_id='" . $row->id_efector_publico . "'";
-		$rsAux = $this->mysqli->query($sql);
-		$rowAux = $rsAux->fetch_object();
-		$row->efector_publico = $rowAux->organismo_area;
-		
-		$sql = "SELECT organismo_area FROM _organismos_areas WHERE organismo_area_id='" . $row->id_prestador_fantasia . "'";
-		$rsAux = $this->mysqli->query($sql);
-		$rowAux = $rsAux->fetch_object();
-		$row->prestador = $rowAux->organismo_area;
-		
-		$sql = "SELECT apenom AS medico_descrip FROM _personal WHERE id_personal=" . $row->id_usuario_medico;
-		$rsAux = $this->mysqli->query($sql);
-		$rowAux = $rsAux->fetch_object();
-		$row->medico_descrip = $rowAux->medico_descrip;
-		
-		$resultado[] = $row;
-	}
 	
 	return $resultado;
   }
   
   
-  public function method_leer_solicitudes_prestaciones($params, $error) {
+  public function method_leer_solicitudes($params, $error) {
 	$p = $params[0];
 	
-  	$opciones = new stdClass;
-  	$opciones->valor = "float";
+	$sql = "SELECT ta_solicitud.id_ta_solicitud, ta_solicitud.f_emite, _personas.persona_nombre AS paciente, _personas.persona_dni AS dni FROM ta_solicitud INNER JOIN _personas ON ta_solicitud.persona_id_paciente=_personas.persona_id";
 	
-	$sql = "SELECT";
-	$sql.= "  solicitudes_prestaciones.*";
-	$sql.= ", prestaciones.*";
-	$sql.= ", prestaciones_tipo.denominacion AS prestacion_tipo";
-	$sql.= ", prestaciones_resultados.denominacion AS prestacion_resultado";
-	$sql.= " FROM solicitudes_prestaciones INNER JOIN prestaciones USING(id_prestacion) INNER JOIN prestaciones_tipo USING(id_prestacion_tipo) LEFT JOIN prestaciones_resultados USING(id_prestacion_resultado)";
-	$sql.= " WHERE solicitudes_prestaciones.id_solicitud=" . $p->id_solicitud;
-	
-	return $this->toJson($sql, $opciones);
-  }
-  
-  
-  public function method_escribir_solicitud($params, $error) {
-	$p = $params[0];
-	
-	$set = $this->prepararCampos($p, "solicitudes");
-	
-	$this->mysqli->query("START TRANSACTION");
-	  		
-	$sql = "UPDATE solicitudes SET " . $set . " WHERE id_solicitud=" . $p->id_solicitud;
-	$this->mysqli->query($sql);
-	
-	$this->auditoria($sql, __FILE__ . ", " . __FUNCTION__);
-	
-	$this->mysqli->query("COMMIT");
+	return $this->toJson($sql);
   }
 }
 

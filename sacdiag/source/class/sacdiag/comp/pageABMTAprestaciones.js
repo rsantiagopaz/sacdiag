@@ -1,11 +1,11 @@
-qx.Class.define("sacdiag.comp.pageABMprestaciones",
+qx.Class.define("sacdiag.comp.pageABMTAprestaciones",
 {
 	extend : qx.ui.tabview.Page,
 	construct : function ()
 	{
 	this.base(arguments);
 
-	this.setLabel('ABM prestaciones');
+	this.setLabel('ABM Traslado y Alojamiento prestaciones');
 	this.toggleShowCloseButton();
 	this.setLayout(new qx.ui.layout.Canvas());
 	
@@ -21,7 +21,7 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 	
 	
 	
-	var functionActualizarPrestacionTipo = function(id_prestacion_tipo) {
+	var functionActualizarPrestacionTipo = function(id_ta_tipo_prestacion) {
 		tblTipo_prestacion.blur();
 		tblTipo_prestacion.setFocusedCell();
 		tblPrestacion.setFocusedCell();
@@ -33,7 +33,7 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 		
 		var p = {};
 		
-		var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.Parametros");
+		var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.TA_Parametros");
 		rpc.addListener("completed", function(e){
 			var data = e.getData();
 			
@@ -41,9 +41,9 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 			
 			tableModelTipo_prestacion.setDataAsMapArray(data.result, true);
 			
-			if (id_prestacion_tipo != null) {
+			if (id_ta_tipo_prestacion != null) {
 				tblTipo_prestacion.blur();
-				tblTipo_prestacion.buscar("id_prestacion_tipo", id_prestacion_tipo);
+				tblTipo_prestacion.buscar("id_ta_tipo_prestacion", id_ta_tipo_prestacion);
 				tblTipo_prestacion.focus();
 			}
 		});
@@ -53,7 +53,7 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 	}
 	
 	
-	var functionActualizarPrestacion = function(id_prestacion) {
+	var functionActualizarPrestacion = function(id_ta_prestacion) {
 		
 		tableModelPrestacion.setDataAsMapArray([], true);
 		
@@ -82,9 +82,9 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 
 			var p = {};
 			p.texto = "";
-			p.phpParametros = {id_prestacion_tipo: rowDataPrestaciones_tipo.id_prestacion_tipo};
+			p.phpParametros = {id_ta_tipo_prestacion: rowDataPrestaciones_tipo.id_ta_tipo_prestacion};
 			
-			this.rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.Parametros");
+			this.rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.TA_Parametros");
 			this.rpc.addListener("completed", function(e){
 				var data = e.getData();
 				
@@ -92,9 +92,9 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 				
 				tableModelPrestacion.setDataAsMapArray(data.result, true);
 				
-				if (id_prestacion != null) {
+				if (id_ta_prestacion != null) {
 					tblPrestacion.blur();
-					tblPrestacion.buscar("id_prestacion", id_prestacion);
+					tblPrestacion.buscar("id_ta_prestacion", id_ta_prestacion);
 					tblPrestacion.focus();
 				}
 				
@@ -150,7 +150,7 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 	
 	var commandAgregarTipo_prestacion = new qx.ui.command.Command("Insert");
 	commandAgregarTipo_prestacion.addListener("execute", function(e){
-		var win = new sacdiag.comp.windowPrestacion_tipo();
+		var win = new sacdiag.comp.windowTAPrestacion_tipo();
 		win.setModal(true);
 		win.addListener("aceptado", function(e){
 			var data = e.getData();
@@ -169,7 +169,7 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 	var commandEditarTipo_prestacion = new qx.ui.command.Command("F2");
 	commandEditarTipo_prestacion.setEnabled(false);
 	commandEditarTipo_prestacion.addListener("execute", function(e){
-		var win = new sacdiag.comp.windowPrestacion_tipo(rowDataPrestaciones_tipo);
+		var win = new sacdiag.comp.windowTAPrestacion_tipo(rowDataPrestaciones_tipo);
 		win.setModal(true);
 		win.addListener("aceptado", function(e){
 			var data = e.getData();
@@ -200,7 +200,7 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 	
 	
 	var tableModelTipo_prestacion = new qx.ui.table.model.Simple();
-	tableModelTipo_prestacion.setColumns(["Descripción"], ["denominacion"]);
+	tableModelTipo_prestacion.setColumns(["Descripción"], ["descrip"]);
 	tableModelTipo_prestacion.addListener("dataChanged", function(e){
 		var rowCount = tableModelTipo_prestacion.getRowCount();
 		
@@ -273,7 +273,7 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 		menuTipo_prestacion.memorizar([commandEditarTipo_prestacion]);
 	});
 
-	this.add(tblTipo_prestacion, {left: 0, top: 20, right: "51%", bottom: 0});
+	this.add(tblTipo_prestacion, {left: 0, top: 20, right: "51%", bottom: 0});	
 	
 	this.add(new qx.ui.basic.Label("Tipo de prestación"), {left: 0, top: 0});
 	
@@ -338,7 +338,7 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 	var commandAgregarPrestacion = new qx.ui.command.Command("Insert");
 	commandAgregarPrestacion.setEnabled(false);
 	commandAgregarPrestacion.addListener("execute", function(e){
-		var win = new sacdiag.comp.windowPrestacion(null, rowDataPrestaciones_tipo.id_prestacion_tipo);
+		var win = new sacdiag.comp.windowTAPrestacion(null, rowDataPrestaciones_tipo.id_ta_tipo_prestacion);
 		win.setModal(true);
 		win.addListener("aceptado", function(e){
 			var data = e.getData();
@@ -357,7 +357,7 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 	var commandEditarPrestacion = new qx.ui.command.Command("F2");
 	commandEditarPrestacion.setEnabled(false);
 	commandEditarPrestacion.addListener("execute", function(e){
-		var win = new sacdiag.comp.windowPrestacion(rowDataPrestacion, rowDataPrestaciones_tipo.id_prestacion_tipo);
+		var win = new sacdiag.comp.windowTAPrestacion(rowDataPrestacion, rowDataPrestaciones_tipo.id_ta_tipo_prestacion);
 		win.setModal(true);
 		win.addListener("aceptado", function(e){
 			var data = e.getData();
@@ -386,7 +386,7 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 	
 	
 	var tableModelPrestacion = new qx.ui.table.model.Simple();
-	tableModelPrestacion.setColumns(["Código", "Descripción", "Valor", "Subt.", "Cronograma"], ["codigo", "denominacion", "valor", "subtipo_descrip", "cronograma_tipo"]);
+	tableModelPrestacion.setColumns(["Código", "Descripción", "Subtipo"], ["codigo", "descrip", "subtipo"]);
 	tableModelPrestacion.addListener("dataChanged", function(e){
 		var rowCount = tableModelPrestacion.getRowCount();
 		
@@ -409,24 +409,17 @@ qx.Class.define("sacdiag.comp.pageABMprestaciones",
 
 	resizeBehaviorPrestacion.set(0, {width:"15%", minWidth:100});
 	resizeBehaviorPrestacion.set(1, {width:"52%", minWidth:100});
-	resizeBehaviorPrestacion.set(2, {width:"11%", minWidth:100});
-	resizeBehaviorPrestacion.set(3, {width:"12%", minWidth:100});
-	resizeBehaviorPrestacion.set(4, {width:"10%", minWidth:100});
+	resizeBehaviorPrestacion.set(2, {width:"12%", minWidth:100});
 	
-	
-	var cellrendererNumber = new qx.ui.table.cellrenderer.Number();
-	cellrendererNumber.setNumberFormat(application.numberformatMontoEs);
-	tableColumnModelPrestacion.setDataCellRenderer(2, cellrendererNumber);	
 	
 	
 	var cellrendererReplace = new qx.ui.table.cellrenderer.Replace();
 	cellrendererReplace.setReplaceMap({
-		"SE" : "Semanal",
-		"ME" : "Mensual",
-		"RK" : "Ranking",
-		"SC" : "Sin cronograma"
+		"T" : "Traslado",
+		"D" : "Derivación",
+		"A" : "Alojamiento"
 	});
-	tableColumnModelPrestacion.setDataCellRenderer(4, cellrendererReplace);
+	tableColumnModelPrestacion.setDataCellRenderer(2, cellrendererReplace);
 
 	
 	

@@ -101,11 +101,7 @@ qx.Class.define("sacdiag.Application",
 	
 
 	
-	var pagePanelDeEstudiosEnProceso;
-	var pageControlDePrefacturaciones;
-	var pageABMprestaciones;
-	var pageABMprestadores;
-	var pageParametros;
+	var pageMain = {};
 
 	
 	
@@ -125,8 +121,6 @@ qx.Class.define("sacdiag.Application",
 	numberformatEntero.setMinimumFractionDigits(0);
 	
 	
-	var loading = this.loading = new componente.comp.ui.ramon.image.Loading("sacdiag/loading66.gif");
-      
 
 	var contenedorMain = new qx.ui.container.Composite(new qx.ui.layout.Grow());
 	var tabviewMain = this.tabviewMain = new qx.ui.tabview.TabView();
@@ -153,30 +147,44 @@ qx.Class.define("sacdiag.Application",
 	
 	var btnPanelDeEstudiosEnProceso = new qx.ui.menu.Button("Panel de Estudios en Proceso...");
 	btnPanelDeEstudiosEnProceso.addListener("execute", function(){
-		if (pagePanelDeEstudiosEnProceso == null) {
-			pagePanelDeEstudiosEnProceso = new sacdiag.comp.pagePanelDeEstudiosEnProceso();
-			pagePanelDeEstudiosEnProceso.addListenerOnce("close", function(e){
-				pagePanelDeEstudiosEnProceso = null;
+		if (pageMain["pagePanelDeEstudiosEnProceso"] == null) {
+			pageMain["pagePanelDeEstudiosEnProceso"] = new sacdiag.comp.pagePanelDeEstudiosEnProceso();
+			pageMain["pagePanelDeEstudiosEnProceso"].addListenerOnce("close", function(e){
+				pageMain["pagePanelDeEstudiosEnProceso"] = null;
 			});
-			tabviewMain.add(pagePanelDeEstudiosEnProceso);
+			tabviewMain.add(pageMain["pagePanelDeEstudiosEnProceso"]);
 		}
-		tabviewMain.setSelection([pagePanelDeEstudiosEnProceso]);
+		tabviewMain.setSelection([pageMain["pagePanelDeEstudiosEnProceso"]]);
 	});
 	mnuEdicion.add(btnPanelDeEstudiosEnProceso);
 	
 	
 	var btnControlDePrefacturaciones = new qx.ui.menu.Button("Control de Prefacturaciones...");
 	btnControlDePrefacturaciones.addListener("execute", function(){
-		if (pageControlDePrefacturaciones == null) {
-			pageControlDePrefacturaciones = new sacdiag.comp.pageControlDePrefacturaciones();
-			pageControlDePrefacturaciones.addListenerOnce("close", function(e){
-				pageControlDePrefacturaciones = null;
+		if (pageMain["pageControlDePrefacturaciones"] == null) {
+			pageMain["pageControlDePrefacturaciones"] = new sacdiag.comp.pageControlDePrefacturaciones();
+			pageMain["pageControlDePrefacturaciones"].addListenerOnce("close", function(e){
+				pageMain["pageControlDePrefacturaciones"] = null;
 			});
-			tabviewMain.add(pageControlDePrefacturaciones);
+			tabviewMain.add(pageMain["pageControlDePrefacturaciones"]);
 		}
-		tabviewMain.setSelection([pageControlDePrefacturaciones]);
+		tabviewMain.setSelection([pageMain["pageControlDePrefacturaciones"]]);
 	});
 	mnuEdicion.add(btnControlDePrefacturaciones);
+	
+	
+	var btnTrasladoyAlojamiento = new qx.ui.menu.Button("Traslado y Alojamiento...");
+	btnTrasladoyAlojamiento.addListener("execute", function(){
+		if (pageMain["pageTrasladoyAlojamiento"] == null) {
+			pageMain["pageTrasladoyAlojamiento"] = new sacdiag.comp.pageTrasladoyAlojamiento();
+			pageMain["pageTrasladoyAlojamiento"].addListenerOnce("close", function(e){
+				pageMain["pageTrasladoyAlojamiento"] = null;
+			});
+			tabviewMain.add(pageMain["pageTrasladoyAlojamiento"]);
+		}
+		tabviewMain.setSelection([pageMain["pageTrasladoyAlojamiento"]]);
+	});
+	mnuEdicion.add(btnTrasladoyAlojamiento);
 	
 	
 	mnuEdicion.addSeparator();
@@ -184,33 +192,58 @@ qx.Class.define("sacdiag.Application",
 	
 	var btnABMPrestaciones = new qx.ui.menu.Button("ABM Prestaciones...");
 	btnABMPrestaciones.addListener("execute", function(){
-		if (pageABMprestaciones == null) {
-			pageABMprestaciones = new sacdiag.comp.pageABMprestaciones();
-			pageABMprestaciones.addListenerOnce("close", function(e){
-				pageABMprestaciones = null;
+		if (pageMain["pageABMprestaciones"] == null) {
+			pageMain["pageABMprestaciones"] = new sacdiag.comp.pageABMprestaciones();
+			pageMain["pageABMprestaciones"].addListenerOnce("close", function(e){
+				pageMain["pageABMprestaciones"] = null;
 			});
-			tabviewMain.add(pageABMprestaciones);
+			tabviewMain.add(pageMain["pageABMprestaciones"]);
 		}
-		tabviewMain.setSelection([pageABMprestaciones]);
+		tabviewMain.setSelection([pageMain["pageABMprestaciones"]]);
 	});
 	mnuEdicion.add(btnABMPrestaciones);
 	
 	
 	var btnABMPrestadores = new qx.ui.menu.Button("ABM Prestadores...");
 	btnABMPrestadores.addListener("execute", function(){
-		if (pageABMprestadores == null) {
-			pageABMprestadores = new sacdiag.comp.pageABMprestadores();
-			pageABMprestadores.addListenerOnce("close", function(e){
-				pageABMprestadores = null;
+		if (pageMain["pageABMprestadores"] == null) {
+			pageMain["pageABMprestadores"] = new sacdiag.comp.pageABMprestadores();
+			pageMain["pageABMprestadores"].addListenerOnce("close", function(e){
+				pageMain["pageABMprestadores"] = null;
 			});
-			tabviewMain.add(pageABMprestadores);
+			tabviewMain.add(pageMain["pageABMprestadores"]);
 		}
-		tabviewMain.setSelection([pageABMprestadores]);
+		tabviewMain.setSelection([pageMain["pageABMprestadores"]]);
 	});
 	mnuEdicion.add(btnABMPrestadores);
 	
 	
-
+	var btnABMTAPrestaciones = new qx.ui.menu.Button("ABM Traslado y Alojamiento prestaciones...");
+	btnABMTAPrestaciones.addListener("execute", function(){
+		if (pageMain["btnABMTAPrestaciones"] == null) {
+			pageMain["btnABMTAPrestaciones"] = new sacdiag.comp.pageABMTAprestaciones();
+			pageMain["btnABMTAPrestaciones"].addListenerOnce("close", function(e){
+				pageMain["btnABMTAPrestaciones"] = null;
+			});
+			tabviewMain.add(pageMain["btnABMTAPrestaciones"]);
+		}
+		tabviewMain.setSelection([pageMain["btnABMTAPrestaciones"]]);
+	});
+	mnuEdicion.add(btnABMTAPrestaciones);
+	
+	
+	mnuEdicion.addSeparator();
+	
+	
+	var btnParametros = new qx.ui.menu.Button("Parámetros...");
+	btnParametros.addListener("execute", function(){
+		var win = new sacdiag.comp.windowParametro();
+		win.setModal(true);
+		doc.add(win);
+		win.center();
+		win.open();
+	});
+	mnuEdicion.add(btnParametros);
 
 	
 
@@ -223,14 +256,14 @@ qx.Class.define("sacdiag.Application",
 	
 	var btnEstadisticas = new qx.ui.menu.Button("Estadísticas...");
 	btnEstadisticas.addListener("execute", function(){
-		if (pageParametros == null) {
-			pageParametros = new sacdiag.comp.pageParametros();
-			pageParametros.addListenerOnce("close", function(e){
-				pageParametros = null;
+		if (pageMain["pageParametros"] == null) {
+			pageMain["pageParametros"] = new sacdiag.comp.pageParametros();
+			pageMain["pageParametros"].addListenerOnce("close", function(e){
+				pageMain["pageParametros"] = null;
 			});
-			tabviewMain.add(pageParametros);
+			tabviewMain.add(pageMain["pageParametros"]);
 		}
-		tabviewMain.setSelection([pageParametros]);
+		tabviewMain.setSelection([pageMain["pageParametros"]]);
 	});
 	mnuVer.add(btnEstadisticas);
 	

@@ -275,8 +275,6 @@ qx.Class.define("sacdiag.comp.pageControlDePrefacturaciones",
 	selectionModelPrefac.addListener("changeSelection", function(e){
 		if (! selectionModelPrefac.isSelectionEmpty()) {
 			
-			application.loading.show();
-			
 			rowDataPrefac = tableModelPrefac.getRowDataAsMap(tblPrefac.getFocusedRow());
 			
 			btnObservarGral.setLabel((rowDataPrefac.estado == "O") ? "Quitar observación..." : "Observar...");
@@ -323,8 +321,6 @@ qx.Class.define("sacdiag.comp.pageControlDePrefacturaciones",
 				if (this.rpc != null) {
 					this.rpc.abort(this.opaqueCallRef);
 					this.rpc = null;
-				} else {
-					application.loading.hide();
 				}
 			}
 			
@@ -349,18 +345,12 @@ qx.Class.define("sacdiag.comp.pageControlDePrefacturaciones",
 					btnAutorizar.setEnabled(rowDataPrefac.estado == "E" && bandera);
 					
 					menuPrefac.memorizar([btnAutorizar]);
-					
-					application.loading.hide();
+
 				});
 				this.rpc.addListener("failed", function(e){
 					var data = e.getData();
 					
 					if (data.message != "sesion_terminada") alert(qx.lang.Json.stringify(data, null, 2));
-					
-					application.loading.hide();
-				});
-				this.rpc.addListener("aborted", function(e){
-					application.loading.hide();
 				});
 				
 				this.opaqueCallRef = this.rpc.callAsyncListeners(false, "leer_solicitudes", p);
@@ -550,8 +540,6 @@ qx.Class.define("sacdiag.comp.pageControlDePrefacturaciones",
 	selectionModelSolicitud.addListener("changeSelection", function(e){
 		if (! selectionModelSolicitud.isSelectionEmpty()) {
 			
-			application.loading.show();
-			
 			rowDataSolicitud = tableModelSolicitud.getRowDataAsMap(tblSolicitud.getFocusedRow());
 			
 			tblPrestacion.resetSelection();
@@ -575,8 +563,6 @@ qx.Class.define("sacdiag.comp.pageControlDePrefacturaciones",
 				if (this.rpc != null) {
 					this.rpc.abort(this.opaqueCallRef);
 					this.rpc = null;
-				} else {
-					application.loading.hide();
 				}
 			}
 			
@@ -592,18 +578,12 @@ qx.Class.define("sacdiag.comp.pageControlDePrefacturaciones",
 					//alert(qx.lang.Json.stringify(data, null, 2));
 			
 					tableModelPrestacion.setDataAsMapArray(data.result, true);
-					
-					application.loading.hide();
+
 				});
 				this.rpc.addListener("failed", function(e){
 					var data = e.getData();
 					
 					if (data.message != "sesion_terminada") alert(qx.lang.Json.stringify(data, null, 2));
-
-					application.loading.hide();
-				});
-				this.rpc.addListener("aborted", function(e){
-					application.loading.hide();
 				});
 				
 				this.opaqueCallRef = this.rpc.callAsyncListeners(false, "leer_solicitudes_prestaciones", p);

@@ -20,26 +20,6 @@ qx.Class.define("sacdiag.comp.pageParametros",
 
 
 	
-	var functionSeleccion = function() {
-		/*
-		chkFecha.setEnabled(rbt00.isValue() || rbt01.isValue() || (chk10.isValue() || chk11.isValue()));
-		lblDesde.setEnabled(chkFecha.getEnabled() && chkFecha.getValue());
-		dtfDesde.setEnabled(chkFecha.getEnabled() && chkFecha.getValue());
-		lblHasta.setEnabled(chkFecha.getEnabled() && chkFecha.getValue());
-		dtfHasta.setEnabled(chkFecha.getEnabled() && chkFecha.getValue());
-		*/
-		return;
-		chk10.setEnabled(true);
-		chk11.setEnabled(true);
-		chk12.setEnabled(true);
-		chk13.setEnabled(true);
-		chk14.setEnabled(true);
-		chk15.setEnabled(true);
-		chk16.setEnabled(true);
-	};
-
-	
-	
 	var gpb0 = new qx.ui.groupbox.GroupBox("Gráficos básicos");
 	var gpb1 = new qx.ui.groupbox.GroupBox("Variable");
 	
@@ -322,18 +302,7 @@ qx.Class.define("sacdiag.comp.pageParametros",
 		
 
 		if (bandera) {
-			//var root = application.getRoot();
-			//var bounds = root.getBounds();
-			//var imageLoading = new qx.ui.basic.Image("sacdiag/loading66.gif");
-	
-			//root.block();
-			//imageLoading.setBackgroundColor("#FFFFFF");
-			//imageLoading.setDecorator("main");
-			//root.add(imageLoading, {left: parseInt(bounds.width / 2 - 33), top: parseInt(bounds.height / 2 - 33)});
-	
-			
-			application.loading.show();
-			
+
 			var p = {};
 			p.basico = {opcion: mgr.getModelSelection().getItem(0)};
 			p.grafico = mgr3.getModelSelection().getItem(0);
@@ -418,8 +387,6 @@ qx.Class.define("sacdiag.comp.pageParametros",
 				
 				//alert(qx.lang.Json.stringify(p, null, 2));
 				
-				//imageLoading.destroy();
-				//root.unblock();
 				
 				
 				
@@ -434,13 +401,10 @@ qx.Class.define("sacdiag.comp.pageParametros",
 					dialog.Dialog.alert("No se encuentran datos para el criterio seleccionado.");
 				}
 				
-				application.loading.hide();
-				
 			});
 			rpc.addListener("failed", function(e){
 				var data = e.getData();
 				
-				application.loading.hide();
 				
 				if (data.message != "sesion_terminada") {
 					alert(qx.lang.Json.stringify(data, null, 2));

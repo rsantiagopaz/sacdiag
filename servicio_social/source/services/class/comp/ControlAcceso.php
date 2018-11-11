@@ -63,6 +63,7 @@ class class_ControlAcceso
 	$sql.= "  sistemas_perfiles_usuarios_oas.id_sist_perfil_usuario_oas AS model";
 	$sql.= ", CONCAT(_organismos_areas.organismo_area, ' - ', _servicios.denominacion) AS label";
 	$sql.= ", organismo_area_id";
+	$sql.= ", oas_usuarios.id_oas_usuario";
 	$sql.= " FROM";
 	$sql.= "  sistemas_perfiles_usuarios_oas
         INNER JOIN _sistemas_perfiles ON sistemas_perfiles_usuarios_oas.perfil_id = _sistemas_perfiles.perfil_id AND _sistemas_perfiles.perfil_id = '" . "acm001" . "'
