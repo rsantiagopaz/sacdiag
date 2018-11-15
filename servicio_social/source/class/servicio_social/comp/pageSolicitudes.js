@@ -16,7 +16,7 @@ qx.Class.define("servicio_social.comp.pageSolicitudes",
 	
 	var application = qx.core.Init.getApplication();
 	
-	
+	var rowData;
 	
 	
 	
@@ -73,8 +73,6 @@ qx.Class.define("servicio_social.comp.pageSolicitudes",
 	var commandEditarSolicitud = new qx.ui.command.Command("Enter");
 	commandEditarSolicitud.setEnabled(false);
 	commandEditarSolicitud.addListener("execute", function(e){
-		var rowData = tableModelSolicitud.getRowDataAsMap(tblSolicitud.getFocusedRow());
-		
 		if (application.pagesMain["id" + rowData.id_ta_solicitud] == null) {
 			application.pagesMain["id" + rowData.id_ta_solicitud] = new servicio_social.comp.pageFormularioDeDatos(rowData);
 			application.pagesMain["id" + rowData.id_ta_solicitud].addListener("aceptado", function(e){
@@ -110,7 +108,7 @@ qx.Class.define("servicio_social.comp.pageSolicitudes",
 	
 	
 	var tableModelSolicitud = new qx.ui.table.model.Simple();
-	tableModelSolicitud.setColumns(["Fecha", "Paciente", "DNI"], ["f_emite", "paciente", "dni"]);
+	tableModelSolicitud.setColumns(["Fecha", "Paciente", "DNI", "Estado", "estado_condicion"], ["f_emite", "paciente", "dni", "estado_descrip", "estado_condicion"]);
 	tableModelSolicitud.addListener("dataChanged", function(e){
 		var rowCount = tableModelSolicitud.getRowCount();
 		
@@ -126,9 +124,13 @@ qx.Class.define("servicio_social.comp.pageSolicitudes",
 	tblSolicitud.toggleColumnVisibilityButtonVisible();
 	//tbl.setRowHeight(45);
 	tblSolicitud.setContextMenu(menuSolicitud);
+	tblSolicitud.addListener("cellDbltap", function(e){
+		commandEditarSolicitud.execute();
+	});
 
 	
 	var tableColumnModelSolicitud = tblSolicitud.getTableColumnModel();
+	tableColumnModelSolicitud.setColumnVisible(4, false);
 	
 	var resizeBehaviorSolicitud = tableColumnModelSolicitud.getBehavior();
 	/*
@@ -167,12 +169,25 @@ qx.Class.define("servicio_social.comp.pageSolicitudes",
 	*/
 	
 	
+	var cellrendererDate = new qx.ui.table.cellrenderer.Date();
+	cellrendererDate.setDateFormat(new qx.util.format.DateFormat("y-MM-dd"));
+	tableColumnModelSolicitud.setDataCellRenderer(0, cellrendererDate);
+	
+
+	var cellrendererString = new qx.ui.table.cellrenderer.String();
+	cellrendererString.addNumericCondition("==", 1, null, "#FF8000", null, null, "estado_condicion");
+	cellrendererString.addNumericCondition("==", 2, null, "#119900", null, null, "estado_condicion");
+	cellrendererString.addNumericCondition("==", 3, null, "#FF0000", null, null, "estado_condicion");
+	tableColumnModelSolicitud.setDataCellRenderer(3, cellrendererString);
+	
+	
 	var selectionModelSolicitud = tblSolicitud.getSelectionModel();
 	selectionModelSolicitud.setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);
 	selectionModelSolicitud.addListener("changeSelection", function(e){
 		if (! selectionModelSolicitud.isSelectionEmpty()) {
+			rowData = tableModelSolicitud.getRowDataAsMap(tblSolicitud.getFocusedRow());
 			
-			commandEditarSolicitud.setEnabled(true);
+			commandEditarSolicitud.setEnabled(rowData.estado == "E");
 		} else {
 			commandEditarSolicitud.setEnabled(false);
 		}

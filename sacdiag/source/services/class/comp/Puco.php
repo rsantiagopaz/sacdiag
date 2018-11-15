@@ -10,13 +10,20 @@ class class_Puco
   	$p = $params[0];
 
 
+	try {
 	//$client = new SoapClient("https://sisa.msal.gov.ar/sisa/services/pucoService?wsdl=PucoService.wsdl");
 	//$response = $client->getPuco(45708759);
 	  	
-	$client = new SoapClient("https://sisa.msal.gov.ar/sisa/services/pucoService?wsdl");
-	$response = $client->getPuco(21902181);
+		//$client = new SoapClient("https://sisa.msal.gov.ar/sisa/services/pucoService?wsdl", array('soap_version' => SOAP_1_2));
+		//$client = new SoapClient("http://impl.exposed.services.ws.server.sisa.msal.gob.ar/PucoServiceSoapImplService", array('login' => "jmgranda", 'password' => "muyes3a2", 'soap_version' => SOAP_1_2));
+		$client = new SoapClient("https://sisa.msal.gov.ar/sisa/services/pucoService");
+
+	} catch (Exception $e) {
+		return $e->getMessage();
+	}
+	//$response = $client->getPuco(21902181);
 	
-	return $response;
+	//return $response;
   }
 
 

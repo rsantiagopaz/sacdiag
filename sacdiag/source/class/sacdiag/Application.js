@@ -268,6 +268,17 @@ qx.Class.define("sacdiag.Application",
 	mnuVer.add(btnEstadisticas);
 	
 	
+	var btnWebServices = new qx.ui.menu.Button("Web services...");
+	btnWebServices.addListener("execute", function(){
+		var win = new sacdiag.comp.windowWebService();
+		win.setModal(true);
+		doc.add(win);
+		win.center();
+		win.open();
+	});
+	mnuVer.add(btnWebServices);
+	
+	
 
 	
 
