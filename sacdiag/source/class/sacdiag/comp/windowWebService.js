@@ -1,7 +1,7 @@
 qx.Class.define("sacdiag.comp.windowWebService",
 {
 	extend : componente.comp.ui.ramon.window.Window,
-	construct : function ()
+	construct : function (dni)
 	{
 	this.base(arguments);
 	
@@ -30,39 +30,72 @@ qx.Class.define("sacdiag.comp.windowWebService",
 	var aux;
 	
 
+	
 	this.add(new qx.ui.basic.Label("D.N.I.:"), {row: 0, column: 0});
 	
-	var txtDni = new qx.ui.form.TextField("21902181");
+	var txtDni = new qx.ui.form.TextField(dni);
+	txtDni.addListener("blur", function(e){
+		this.setValue(this.getValue().trim());
+	});
 	this.add(txtDni, {row: 0, column: 2});
 	
 	var slbWebService = new qx.ui.form.SelectBox();
 	slbWebService.setMinWidth(300);
 	slbWebService.add(new qx.ui.form.ListItem("PUCO - Padrón Único Consolidado Operativo", null, "puco"));
-	slbWebService.add(new qx.ui.form.ListItem("IOSEP1", null, "iosep1"));
-	slbWebService.add(new qx.ui.form.ListItem("IOSEP2", null, "iosep2"));
+	slbWebService.add(new qx.ui.form.ListItem("Prácticas (IOSEP)", null, "practicas"));
+	slbWebService.add(new qx.ui.form.ListItem("Internaciones (IOSEP)", null, "internaciones"));
+	slbWebService.addListener("changeSelection", function(e){
+		txtDatos.setValue("");
+	});
 	this.add(slbWebService, {row: 0, column: 3});
 	
 	var btnConsultar = new qx.ui.form.Button("Consultar...");
 	btnConsultar.addListener("execute", function(e){
-		var p = {};
+		application.loading.show();
 		
-			var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.Puco");
-			rpc.addListener("completed", function(e){
-				var data = e.getData();
-				
-				alert(qx.lang.Json.stringify(data, null, 2));
+		txtDni.setEnabled(false);
+		slbWebService.setEnabled(false);
+		btnConsultar.setEnabled(false);
+		
+		var p = {};
+		p.dni = txtDni.getValue();
+		
+		var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.WebServices");
+		rpc.setTimeout(1000 * 60);
+		rpc.addListener("completed", function(e){
+			var data = e.getData();
+			
+			application.loading.hide();
+			
+			txtDni.setEnabled(true);
+			slbWebService.setEnabled(true);
+			btnConsultar.setEnabled(true);
+			
+			//alert(qx.lang.Json.stringify(data, null, 2));
+			
+			txtDatos.setValue(data.result.texto);
+			//txtDatos.setValue(qx.lang.Json.stringify(data.result, null, 2));
 
-			}, this);
-			rpc.addListener("failed", function(e){
-				var data = e.getData();
-				
-				alert(qx.lang.Json.stringify(data, null, 2));
-			}, this);
-			rpc.callAsyncListeners(true, "prueba", p);
+		}, this);
+		rpc.addListener("failed", function(e){
+			var data = e.getData();
+			
+			application.loading.hide();
+			
+			txtDni.setEnabled(true);
+			slbWebService.setEnabled(true);
+			btnConsultar.setEnabled(true);
+			
+			alert(qx.lang.Json.stringify(data, null, 2));
+		}, this);
+		
+		if (slbWebService.getSelection()[0].getModel()=="puco") rpc.callAsyncListeners(true, "getPuco1", p);
+		if (slbWebService.getSelection()[0].getModel()=="practicas") rpc.callAsyncListeners(true, "getPracticas", p);
+		if (slbWebService.getSelection()[0].getModel()=="internaciones") rpc.callAsyncListeners(true, "getInternaciones", p);
 	});
 	this.add(btnConsultar, {row: 0, column: 5});
 	
-	this.add(new qx.ui.basic.Label("Datos:"), {row: 2, column: 0});
+	this.add(new qx.ui.basic.Label("Datos recibidos:"), {row: 2, column: 0});
 	
 	var txtDatos = new qx.ui.form.TextArea("");
 	txtDatos.setMinHeight(300);

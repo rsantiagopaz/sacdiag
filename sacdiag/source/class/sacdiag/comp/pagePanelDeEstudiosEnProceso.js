@@ -40,7 +40,8 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 		btnCambiarPrestador.setEnabled(false);
 		btnAutorizar.setEnabled(false);
 		btnBloquear.setEnabled(false);
-		menuSolicitud.memorizar([btnCambiarPrestador, btnAutorizar, btnBloquear]);
+		btnWebServices.setEnabled(false);
+		menuSolicitud.memorizar([btnCambiarPrestador, btnAutorizar, btnBloquear, btnWebServices]);
 		
 		controllerFormInfoEntsal.resetModel();
 		
@@ -176,7 +177,7 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	slbEstado.add(new qx.ui.form.ListItem("Emitida", null, "E"));
 	slbEstado.add(new qx.ui.form.ListItem("Aprobada", null, "A"));
 	slbEstado.add(new qx.ui.form.ListItem("Bloqueada", null, "B"));
-	//slbEstado.add(new qx.ui.form.ListItem("Capturada", null, "C"));
+	slbEstado.add(new qx.ui.form.ListItem("Capturada", null, "C"));
 	slbEstado.add(new qx.ui.form.ListItem("Liberada", null, "L"));
 	slbEstado.add(new qx.ui.form.ListItem("Prefacturada", null, "F"));
 	slbEstado.add(new qx.ui.form.ListItem("para Pago", null, "P"));
@@ -360,11 +361,23 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	});
 	
 	
+	var btnWebServices = new qx.ui.menu.Button("consultar Web services...");
+	btnWebServices.addListener("execute", function(e){
+		var win = new sacdiag.comp.windowWebService(rowDataSolicitud.persona_dni);
+		win.setModal(true);
+		application.getRoot().add(win);
+		win.center();
+		win.open();
+	});
+	
+	
 	var menuSolicitud = new componente.comp.ui.ramon.menu.Menu();
 	
 	menuSolicitud.add(btnCambiarPrestador);
 	menuSolicitud.add(btnAutorizar);
 	menuSolicitud.add(btnBloquear);
+	menuSolicitud.addSeparator();
+	menuSolicitud.add(btnWebServices);
 	menuSolicitud.memorizar();
 	
 	
@@ -439,14 +452,17 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 			
 			rowDataSolicitud = tableModelSolicitud.getRowDataAsMap(tblSolicitud.getFocusedRow());
 			
+			tableModelPrestacion.setDataAsMapArray([], true);
+			
 			controllerFormInfoEntsal.setModel(qx.data.marshal.Json.createModel(rowDataSolicitud));
 			
 			btnCambiarPrestador.setEnabled(rowDataSolicitud.estado == "E" || rowDataSolicitud.estado == "A");
 			btnAutorizar.setEnabled(rowDataSolicitud.estado == "E");
 			btnBloquear.setEnabled(rowDataSolicitud.estado == "B" || rowDataSolicitud.estado == "A");
 			btnBloquear.setLabel((rowDataSolicitud.estado == "B") ? "Desbloquear" : "Bloquear")
+			btnWebServices.setEnabled(true);
 			
-			menuSolicitud.memorizar([btnCambiarPrestador, btnAutorizar, btnBloquear]);
+			menuSolicitud.memorizar([btnCambiarPrestador, btnAutorizar, btnBloquear, btnWebServices]);
 			
 			
 			var timer = qx.util.TimerManager.getInstance();

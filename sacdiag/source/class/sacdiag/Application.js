@@ -103,6 +103,7 @@ qx.Class.define("sacdiag.Application",
 	
 	var pageMain = {};
 
+	var loading = this.loading = new componente.comp.ui.ramon.image.Loading("sacdiag/loading66.gif");
 	
 	
 	var numberformatMontoEs = this.numberformatMontoEs = new qx.util.format.NumberFormat("es");
@@ -270,7 +271,7 @@ qx.Class.define("sacdiag.Application",
 	
 	var btnWebServices = new qx.ui.menu.Button("Web services...");
 	btnWebServices.addListener("execute", function(){
-		var win = new sacdiag.comp.windowWebService();
+		var win = new sacdiag.comp.windowWebService("");
 		win.setModal(true);
 		doc.add(win);
 		win.center();
