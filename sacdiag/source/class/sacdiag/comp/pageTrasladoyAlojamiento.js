@@ -538,13 +538,13 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	aux.setBackgroundColor("#ffffc0");
 	formInfoEntsal.add(aux, "Fundamentacion", null, "fundamentacion");
 	
-	aux = new qx.ui.form.TextField("");
+	aux = new qx.ui.form.TextArea("");
 	aux.setReadOnly(true);
 	aux.setDecorator("main");
 	aux.setBackgroundColor("#ffffc0");
 	formInfoEntsal.add(aux, "Servicio", null, "internacion_servicio");
 	
-	aux = new qx.ui.form.TextField("");
+	aux = new qx.ui.form.TextArea("");
 	aux.setReadOnly(true);
 	aux.setDecorator("main");
 	aux.setBackgroundColor("#ffffc0");

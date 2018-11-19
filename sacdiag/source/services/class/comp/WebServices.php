@@ -45,7 +45,7 @@ class class_WebServices
 		$resultado->texto.= $datos->mensaje;
 	} else {
 		$resultado->texto.= "Nombre afiliado: " . $datos->NombreAfiliado . chr(13);
-		$resultado->texto.= "A.numero: " . $datos->A_Numero . chr(13);
+		$resultado->texto.= "Af.numero: " . $datos->A_Numero . chr(13);
 		
 		if (count($datos->Practicas) > 0) {
 			$resultado->texto.= chr(13);
@@ -113,7 +113,7 @@ class class_WebServices
 		$resultado->texto.= $datos->mensaje;
 	} else {
 		$resultado->texto.= "Nombre afiliado: " . $datos->NombreAfiliado . chr(13);
-		$resultado->texto.= "A.numero: " . $datos->A_Numero . chr(13);
+		$resultado->texto.= "Af.numero: " . $datos->A_Numero . chr(13);
 		
 		if (count($datos->DetallesInternaciones) > 0) {
 			$resultado->texto.= chr(13);

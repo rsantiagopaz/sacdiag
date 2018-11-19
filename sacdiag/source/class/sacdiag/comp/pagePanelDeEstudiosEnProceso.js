@@ -64,6 +64,7 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 			p.desde = dtfDesde.getValue();
 			p.hasta = dtfHasta.getValue();
 			p.id_prestador_fantasia = lstPrestador.getSelection()[0].getModel();
+			if (! lstEPublico.isSelectionEmpty()) p.id_efector_publico = lstEPublico.getSelection()[0].getModel();
 			if (! lstPaciente.isSelectionEmpty()) p.persona_id = lstPaciente.getSelection()[0].getModel();
 			if (! lstPersonal.isSelectionEmpty()) p.id_usuario_medico = lstPersonal.getSelection()[0].getModel();
 			p.estado = slbEstado.getSelection()[0].getModel();
@@ -93,9 +94,12 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	
 	
 	
+	var layout = new qx.ui.layout.Grid(6, 6);
+	layout.setColumnAlign(0, "right", "middle");
+	layout.setColumnFlex(4, 1);
 	
 	var gbxFiltrar = new qx.ui.groupbox.GroupBox("Filtrar solicitudes");
-	gbxFiltrar.setLayout(new qx.ui.layout.Grid(6, 6));
+	gbxFiltrar.setLayout(layout);
 	this.add(gbxFiltrar, {left: 0, top: 0, right: "80%"});
 	
 	
@@ -117,7 +121,35 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	dtfDesde.setValue(aux);
 	
 	
-	gbxFiltrar.add(new qx.ui.basic.Label("Prestador:"), {row: 2, column: 0});
+
+	
+	gbxFiltrar.add(new qx.ui.basic.Label("Paciente:"), {row: 2, column: 0});
+	
+	var cboPaciente = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarPersona"});
+	//cboPrestador.setWidth(400);
+	
+	var lstPaciente = cboPaciente.getChildControl("list");
+	lstPaciente.addListener("changeSelection", function(e){
+		var data = e.getData();
+		
+	});
+	gbxFiltrar.add(cboPaciente, {row: 2, column: 1, colSpan: 4});
+	
+	
+	gbxFiltrar.add(new qx.ui.basic.Label("Ef.público:"), {row: 3, column: 0});
+	
+	var cboEPublico = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarEfector"});
+
+	var lstEPublico = cboEPublico.getChildControl("list");
+	lstEPublico.addListener("changeSelection", function(e){
+		var data = e.getData();
+		
+	});
+	gbxFiltrar.add(cboEPublico, {row: 3, column: 1, colSpan: 4});
+	
+	
+	
+	gbxFiltrar.add(new qx.ui.basic.Label("Prestador:"), {row: 4, column: 0});
 	
 	var cboPrestador = new qx.ui.form.SelectBox();
 	cboPrestador.add(new qx.ui.form.ListItem("-", null, ""));
@@ -139,24 +171,12 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	
 	var lstPrestador = cboPrestador.getChildControl("list");
 
-	gbxFiltrar.add(cboPrestador, {row: 2, column: 1, colSpan: 3});
+	gbxFiltrar.add(cboPrestador, {row: 4, column: 1, colSpan: 4});
 	
 	
 	
-	gbxFiltrar.add(new qx.ui.basic.Label("Paciente:"), {row: 3, column: 0});
 	
-	var cboPaciente = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarPersona"});
-	//cboPrestador.setWidth(400);
-	
-	var lstPaciente = cboPaciente.getChildControl("list");
-	lstPaciente.addListener("changeSelection", function(e){
-		var data = e.getData();
-		
-	});
-	gbxFiltrar.add(cboPaciente, {row: 3, column: 1, colSpan: 3});
-	
-	
-	gbxFiltrar.add(new qx.ui.basic.Label("Médico:"), {row: 4, column: 0});
+	gbxFiltrar.add(new qx.ui.basic.Label("Médico:"), {row: 5, column: 0});
 	
 	var cboPersonal = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarPersonal"});
 	//cboPrestador.setWidth(400);
@@ -166,11 +186,11 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 		var data = e.getData();
 		
 	});
-	gbxFiltrar.add(cboPersonal, {row: 4, column: 1, colSpan: 3});
+	gbxFiltrar.add(cboPersonal, {row: 5, column: 1, colSpan: 4});
 	
 	
 	
-	gbxFiltrar.add(new qx.ui.basic.Label("Estado:"), {row: 5, column: 0});
+	gbxFiltrar.add(new qx.ui.basic.Label("Estado:"), {row: 6, column: 0});
 	
 	var slbEstado = new qx.ui.form.SelectBox();
 	slbEstado.add(new qx.ui.form.ListItem("-", null, ""));
@@ -182,7 +202,7 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	slbEstado.add(new qx.ui.form.ListItem("Prefacturada", null, "F"));
 	slbEstado.add(new qx.ui.form.ListItem("para Pago", null, "P"));
 	
-	gbxFiltrar.add(slbEstado, {row: 5, column: 1});
+	gbxFiltrar.add(slbEstado, {row: 6, column: 1});
 	
 	
 	
@@ -195,6 +215,9 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 		
 		cboPrestador.setSelection([cboPrestador.getChildren()[0]]);
 		
+		lstEPublico.removeAll();
+		cboEPublico.setValue("");
+		
 		lstPaciente.removeAll();
 		cboPaciente.setValue("");
 		
@@ -205,7 +228,7 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 		
 		dtfDesde.focus();
 	})
-	gbxFiltrar.add(btnInicializar, {row: 6, column: 2});
+	gbxFiltrar.add(btnInicializar, {row: 7, column: 2});
 	
 
 	
@@ -213,7 +236,7 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	btnFiltrar.addListener("execute", function(e){
 		functionActualizarSolicitud();
 	})
-	gbxFiltrar.add(btnFiltrar, {row: 6, column: 3});
+	gbxFiltrar.add(btnFiltrar, {row: 7, column: 3});
 	
 	
 	

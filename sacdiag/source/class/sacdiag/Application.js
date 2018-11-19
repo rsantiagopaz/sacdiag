@@ -105,6 +105,8 @@ qx.Class.define("sacdiag.Application",
 
 	var loading = this.loading = new componente.comp.ui.ramon.image.Loading("sacdiag/loading66.gif");
 	
+	sacdiag.comp.rpc.Rpc.LOADING = loading;
+	
 	
 	var numberformatMontoEs = this.numberformatMontoEs = new qx.util.format.NumberFormat("es");
 	numberformatMontoEs.setGroupingUsed(true);

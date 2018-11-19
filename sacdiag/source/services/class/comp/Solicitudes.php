@@ -34,6 +34,7 @@ class class_Solicitudes extends class_Base
 	}
 	
 	if (! empty($p->id_prestador_fantasia)) $sql.= " AND id_prestador_fantasia='" . $p->id_prestador_fantasia . "'";
+	if (! is_null($p->id_efector_publico)) $sql.= " AND id_efector_publico='" . $p->id_efector_publico . "'";
 	if (! is_null($p->persona_id)) $sql.= " AND persona_id='" . $p->persona_id . "'";
 	if (! is_null($p->id_usuario_medico)) $sql.= " AND id_usuario_medico='" . $p->id_usuario_medico . "'";
 	if (! empty($p->estado)) $sql.= " AND estado='" . $p->estado . "'";
