@@ -1,4 +1,4 @@
-qx.Class.define("sacdiag.comp.windowWebService",
+qx.Class.define("servicio_social.comp.windowWebService",
 {
 	extend : componente.comp.ui.ramon.window.Window,
 	construct : function (dni)
@@ -19,7 +19,7 @@ qx.Class.define("sacdiag.comp.windowWebService",
 	this.setLayout(new qx.ui.layout.Canvas());
 
 	this.addListenerOnce("appear", function(e){
-		loading = new componente.comp.ui.ramon.image.Loading("sacdiag/loading66.gif", this);
+		loading = new componente.comp.ui.ramon.image.Loading("servicio_social/loading66.gif", this);
 		
 		txtDni.focus();
 	}, this);
@@ -63,7 +63,7 @@ qx.Class.define("sacdiag.comp.windowWebService",
 		var p = {};
 		p.dni = txtDni.getValue();
 		
-		var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.WebServices");
+		var rpc = new servicio_social.comp.rpc.Rpc("services/", "comp.WebServices");
 		rpc.setTimeout(1000 * 60);
 		rpc.mostrar = false;
 		rpc.addListener("completed", function(e){

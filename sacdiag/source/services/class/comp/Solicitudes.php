@@ -23,7 +23,7 @@ class class_Solicitudes extends class_Base
 	
 	$resultado = array();
 	
-	$sql = "SELECT solicitudes.*, _personas.persona_nombre, _personas.persona_dni FROM solicitudes INNER JOIN _personas USING(persona_id) WHERE TRUE";
+	$sql = "SELECT solicitudes.id_solicitud, solicitudes.fecha_emite, solicitudes.estado, solicitudes.id_efector_publico, solicitudes.id_prestador_fantasia, _personas.persona_nombre, _personas.persona_dni FROM solicitudes INNER JOIN _personas USING(persona_id) WHERE TRUE";
 	
 	if (! is_null($p->desde) && ! is_null($p->hasta)) {
 		$sql.= " AND (fecha_emite BETWEEN '" . substr($p->desde, 0, 10) . "' AND '" . substr($p->hasta, 0, 10) . "')";
@@ -39,12 +39,11 @@ class class_Solicitudes extends class_Base
 	if (! is_null($p->id_usuario_medico)) $sql.= " AND id_usuario_medico='" . $p->id_usuario_medico . "'";
 	if (! empty($p->estado)) $sql.= " AND estado='" . $p->estado . "'";
 	
-	$sql.= " ORDER BY fecha_emite DESC";
+	$sql.= " ORDER BY fecha_emite DESC, id_solicitud DESC";
 	
 	$rs = $this->mysqli->query($sql);
 	while ($row = $rs->fetch_object()) {
 		$row->estado_descrip = $estado[$row->estado];
-		$row->anses_negativa = ($row->anses_negativa == "S") ? "Si" : "No";
 		
 		if ($row->estado=="E") {
 			$row->estado_condicion = 1;
@@ -66,11 +65,6 @@ class class_Solicitudes extends class_Base
 		$rowAux = $rsAux->fetch_object();
 		$row->prestador = $rowAux->organismo_area;
 		
-		$sql = "SELECT apenom AS medico_descrip FROM _personal WHERE id_personal=" . $row->id_usuario_medico;
-		$rsAux = $this->mysqli->query($sql);
-		$rowAux = $rsAux->fetch_object();
-		$row->medico_descrip = $rowAux->medico_descrip;
-		
 		$resultado[] = $row;
 	}
 	
@@ -80,6 +74,8 @@ class class_Solicitudes extends class_Base
   
   public function method_leer_solicitudes_prestaciones($params, $error) {
 	$p = $params[0];
+	
+	$resultado = new stdClass;
 	
   	$opciones = new stdClass;
   	$opciones->valor = "float";
@@ -92,7 +88,25 @@ class class_Solicitudes extends class_Base
 	$sql.= " FROM solicitudes_prestaciones INNER JOIN prestaciones USING(id_prestacion) INNER JOIN prestaciones_tipo USING(id_prestacion_tipo) LEFT JOIN prestaciones_resultados USING(id_prestacion_resultado)";
 	$sql.= " WHERE solicitudes_prestaciones.id_solicitud=" . $p->id_solicitud;
 	
-	return $this->toJson($sql, $opciones);
+	$resultado->prestacion = $this->toJson($sql, $opciones);
+	
+	
+	
+	$sql = "SELECT id_usuario_medico, informacion_clinica, observaciones, observaciones_bloqueo, anses_negativa FROM solicitudes WHERE id_solicitud=" . $p->id_solicitud;
+	$rs = $this->mysqli->query($sql);
+	$row = $rs->fetch_object();
+	
+	$row->anses_negativa = ($row->anses_negativa == "S") ? "Si" : "No";
+	
+	$sql = "SELECT apenom AS medico_descrip FROM _personal WHERE id_personal=" . $row->id_usuario_medico;
+	$rsAux = $this->mysqli->query($sql);
+	$rowAux = $rsAux->fetch_object();
+	$row->medico_descrip = $rowAux->medico_descrip;
+	
+	$resultado->solicitud = $row;
+	
+	
+	return $resultado;
   }
   
   

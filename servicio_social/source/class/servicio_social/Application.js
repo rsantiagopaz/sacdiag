@@ -102,6 +102,10 @@ qx.Class.define("servicio_social.Application",
 
 	
 	var pagesMain = this.pagesMain = {};
+	
+	var loading = this.loading = new componente.comp.ui.ramon.image.Loading("servicio_social/loading66.gif");
+	
+	servicio_social.comp.rpc.Rpc.LOADING = loading;
 
 	
 	
@@ -149,7 +153,7 @@ qx.Class.define("servicio_social.Application",
 	var btnSolicitudes = new qx.ui.menu.Button("Solicitudes...");
 	btnSolicitudes.addListener("execute", function(){
 		if (pagesMain.pageSolicitudes == null) {
-			pagesMain.pageSolicitudes = new servicio_social.comp.pageSolicitudes();
+			pagesMain.pageSolicitudes = new servicio_social.comp.pageTrasladoyAlojamiento();
 			pagesMain.pageSolicitudes.addListenerOnce("close", function(e){
 				pagesMain.pageSolicitudes = null;
 			});
@@ -165,6 +169,18 @@ qx.Class.define("servicio_social.Application",
 	
 	
 
+	var mnuVer = new qx.ui.menu.Menu();
+	
+	
+	var btnWebServices = new qx.ui.menu.Button("Web services...");
+	btnWebServices.addListener("execute", function(){
+		var win = new servicio_social.comp.windowWebService("");
+		win.setModal(true);
+		doc.add(win);
+		win.center();
+		win.open();
+	});
+	mnuVer.add(btnWebServices);
 	
 	
 	
@@ -198,17 +214,20 @@ qx.Class.define("servicio_social.Application",
 	  
 	var mnubtnArchivo = new qx.ui.toolbar.MenuButton('Archivo');
 	var mnubtnEdicion = new qx.ui.toolbar.MenuButton("Edición");
+	var mnubtnVer = new qx.ui.toolbar.MenuButton('Ver');
 	var mnubtnSesion = new qx.ui.toolbar.MenuButton('Sesión');
 
 	
 	mnubtnArchivo.setMenu(mnuArchivo);
 	mnubtnEdicion.setMenu(mnuEdicion);
+	mnubtnVer.setMenu(mnuVer);
 	mnubtnSesion.setMenu(mnuSesion);
 	  
 	
 	var toolbarMain = new qx.ui.toolbar.ToolBar();
 	toolbarMain.add(mnubtnArchivo);
 	//toolbarMain.add(mnubtnEdicion);
+	toolbarMain.add(mnubtnVer);
 	toolbarMain.add(mnubtnSesion);
 	toolbarMain.addSpacer();
 	

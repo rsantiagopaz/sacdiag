@@ -9,30 +9,27 @@ qx.Class.define("servicio_social.comp.rpc.Rpc",
 		
 		var application = qx.core.Init.getApplication();
 		
-		var bounds = application.getRoot().getBounds();
+		if (servicio_social.comp.rpc.Rpc.LOADING == null) {
+			this.loading = new componente.comp.ui.ramon.image.Loading("servicio_social/loading66.gif");
+		} else {
+			this.loading = servicio_social.comp.rpc.Rpc.LOADING;
+		}
 		
-		this.image = new qx.ui.basic.Image("servicio_social/loading66.gif");
-		this.image.setVisibility("hidden");
-		this.image.setBackgroundColor("#FFFFFF");
-		this.image.setDecorator("main");
-		application.getRoot().add(this.image, {left: parseInt(bounds.width / 2 - 33), top: parseInt(bounds.height / 2 - 33)});
-		
-		this.image.addListenerOnce("appear", function(e){
-			this.image.setZIndex(30000);
-		}, this);
 		
 		
 
 		this.addListener("completed", function(e){
 			var data = e.getData();
 			
-			this.image.setVisibility("hidden");
+			//this.image.setVisibility("hidden");
+			if (this.mostrar) this.loading.hide();
 		}, this);
 		
 		this.addListener("failed", function(e){
 			var data = e.getData();
 			
-			this.image.setVisibility("hidden");
+			//this.image.setVisibility("hidden");
+			if (this.mostrar) this.loading.hide();
 			
 			if (data.message == "sesion_terminada") dialog.Dialog.warning("Sesión terminada.<br/>Debe ingresar datos de autenticación.", function(e){location.reload(true);});
 			
@@ -41,33 +38,42 @@ qx.Class.define("servicio_social.comp.rpc.Rpc",
 		this.addListener("timeout", function(e){
 			var data = e.getData();
 			
-			this.image.setVisibility("hidden");
+			//this.image.setVisibility("hidden");
+			if (this.mostrar) this.loading.hide();
 		}, this);
 		
 		this.addListener("aborted", function(e){
 			var data = e.getData();
 			
-			this.image.setVisibility("hidden");
+			//this.image.setVisibility("hidden");
+			if (this.mostrar) this.loading.hide();
 		}, this);
 	},
 	
 	
 	members :
 	{
-		image: null,
+		loading: null,
 		mostrar: true,
 		
 		callAsyncListeners : function (coalesce, methodName, p)
 		{
-			if (this.mostrar) this.image.setVisibility("visible");
+			//if (this.mostrar) this.image.setVisibility("visible");
+			if (this.mostrar) this.loading.show();
 			
 			return this.base(arguments, coalesce, methodName, p);
 		}
 	},
 	
 	
+	statics :
+	{
+		LOADING: null
+	},
+	
+	
 	destruct : function ()
 	{
-		this.image.destroy();
+		//this.loading.destroy();
 	}
 });
