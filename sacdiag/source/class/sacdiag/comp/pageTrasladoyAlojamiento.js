@@ -32,14 +32,15 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	
 	
 	
-	var functionActualizarSolicitud = function(id_solicitud) {
+	var functionActualizarSolicitud = function(id_ta_solicitud) {
 		
 		tblSolicitud.setFocusedCell();
 		tableModelPrestacion.setDataAsMapArray([], true);
 		
 		btnAutorizar.setEnabled(false);
 		btnBloquear.setEnabled(false);
-		menuSolicitud.memorizar([btnAutorizar, btnBloquear]);
+		btnWebServices.setEnabled(false);
+		menuSolicitud.memorizar([btnAutorizar, btnBloquear, btnWebServices]);
 		
 		controllerFormInfoEntsal.resetModel();
 		
@@ -61,8 +62,8 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 			var p = {};
 			p.desde = dtfDesde.getValue();
 			p.hasta = dtfHasta.getValue();
-			p.id_prestador_fantasia = lstPrestador.getSelection()[0].getModel();
 			if (! lstPaciente.isSelectionEmpty()) p.persona_id_paciente = lstPaciente.getSelection()[0].getModel();
+			if (! lstEPublico.isSelectionEmpty()) p.id_efector_publico = lstEPublico.getSelection()[0].getModel();
 			if (! lstPersonal.isSelectionEmpty()) p.id_personal_medico = lstPersonal.getSelection()[0].getModel();
 			p.estado = slbEstado.getSelection()[0].getModel();
 			
@@ -76,9 +77,9 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	
 				tableModelSolicitud.setDataAsMapArray(data.result, true);
 				
-				if (id_solicitud != null) {
+				if (id_ta_solicitud != null) {
 					tblSolicitud.blur();
-					tblSolicitud.buscar("id_solicitud", id_solicitud);
+					tblSolicitud.buscar("id_ta_solicitud", id_ta_solicitud);
 					tblSolicitud.focus();
 				}
 			});
@@ -99,20 +100,24 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	
 	
 	var gbxFiltrar = new qx.ui.groupbox.GroupBox("Filtrar solicitudes");
-	gbxFiltrar.setLayout(new qx.ui.layout.Grid(6, 6));
-	this.add(gbxFiltrar, {left: 0, top: 0});
+	gbxFiltrar.setLayout(new qx.ui.layout.Grow());
+	this.add(gbxFiltrar, {left: 0, top: 0, right: "78%"});
 	
+	
+	var form = new qx.ui.form.Form();
 	
 
-	gbxFiltrar.add(new qx.ui.basic.Label("Desde:"), {row: 0, column: 0});
+	//gbxFiltrar.add(new qx.ui.basic.Label("Desde:"), {row: 0, column: 0});
 	
 	var dtfDesde = new qx.ui.form.DateField();
-	gbxFiltrar.add(dtfDesde, {row: 0, column: 1});
+	dtfDesde.setMaxWidth(100);
+	form.add(dtfDesde, "Desde", null, "fecha_desde", null, {grupo: 1, tabIndex: 1, item: {row: 0, column: 1, colSpan: 2}});
 	
-	gbxFiltrar.add(new qx.ui.basic.Label("Hasta:"), {row: 1, column: 0});
+	//gbxFiltrar.add(new qx.ui.basic.Label("Hasta:"), {row: 1, column: 0});
 	
 	var dtfHasta = new qx.ui.form.DateField();
-	gbxFiltrar.add(dtfHasta, {row: 1, column: 1});
+	dtfHasta.setMaxWidth(100);
+	form.add(dtfHasta, "Hasta", null, "fecha_hasta", null, {grupo: 1, item: {row: 1, column: 1, colSpan: 2}});
 	
 	
 	var aux = new Date;
@@ -121,33 +126,9 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	dtfDesde.setValue(aux);
 	
 	
-	//gbxFiltrar.add(new qx.ui.basic.Label("Prestador:"), {row: 2, column: 0});
-	
-	var cboPrestador = new qx.ui.form.SelectBox();
-	cboPrestador.add(new qx.ui.form.ListItem("-", null, ""));
-	
-	var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.Parametros");
-	rpc.addListener("completed", function(e){
-		var data = e.getData();
-		
-		for (var x in data.result) {
-			//listItem = new qx.ui.form.ListItem(data.result[x].nombre, null, data.result[x].organismo_area_id)
-			cboPrestador.add(new qx.ui.form.ListItem(data.result[x].nombre, null, data.result[x].organismo_area_id));
-		}
-	});
-	rpc.callAsyncListeners(true, "autocompletarPrestador", {texto: ""});
-	
-	
-	//var cboPrestador = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarPrestador"});
-	//cboPrestador.setWidth(400);
-	
-	var lstPrestador = cboPrestador.getChildControl("list");
 
-	//gbxFiltrar.add(cboPrestador, {row: 2, column: 1, colSpan: 3});
 	
-	
-	
-	gbxFiltrar.add(new qx.ui.basic.Label("Paciente:"), {row: 3, column: 0});
+	//gbxFiltrar.add(new qx.ui.basic.Label("Paciente:"), {row: 2, column: 0});
 	
 	var cboPaciente = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarPersona"});
 	//cboPrestador.setWidth(400);
@@ -157,10 +138,27 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 		var data = e.getData();
 		
 	});
-	gbxFiltrar.add(cboPaciente, {row: 3, column: 1, colSpan: 3});
+	form.add(cboPaciente, "Paciente", null, "persona_id", null, {grupo: 1, item: {row: 2, column: 1, colSpan: 4}});
 	
 	
-	gbxFiltrar.add(new qx.ui.basic.Label("Médico:"), {row: 4, column: 0});
+	//gbxFiltrar.add(new qx.ui.basic.Label("Ef.público:"), {row: 3, column: 0});
+	
+	var cboEPublico = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarEfector"});
+
+	var lstEPublico = cboEPublico.getChildControl("list");
+	lstEPublico.addListener("changeSelection", function(e){
+		var data = e.getData();
+		
+	});
+	form.add(cboEPublico, "Ef.público", null, "id_efector_publico", null, {grupo: 1, item: {row: 3, column: 1, colSpan: 4}});
+	
+	
+	
+	
+	
+	
+	
+	//gbxFiltrar.add(new qx.ui.basic.Label("Médico:"), {row: 5, column: 0});
 	
 	var cboPersonal = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarPersonal"});
 	//cboPrestador.setWidth(400);
@@ -170,23 +168,23 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 		var data = e.getData();
 		
 	});
-	gbxFiltrar.add(cboPersonal, {row: 4, column: 1, colSpan: 3});
+	form.add(cboPersonal, "Médico", null, "id_personal", null, {grupo: 1, item: {row: 4, column: 1, colSpan: 4}});
 	
 	
 	
-	gbxFiltrar.add(new qx.ui.basic.Label("Estado:"), {row: 5, column: 0});
+	//gbxFiltrar.add(new qx.ui.basic.Label("Estado:"), {row: 6, column: 0});
 	
 	var slbEstado = new qx.ui.form.SelectBox();
 	slbEstado.add(new qx.ui.form.ListItem("-", null, ""));
 	slbEstado.add(new qx.ui.form.ListItem("Emitida", null, "E"));
 	slbEstado.add(new qx.ui.form.ListItem("Aprobada", null, "A"));
 	slbEstado.add(new qx.ui.form.ListItem("Bloqueada", null, "B"));
-	//slbEstado.add(new qx.ui.form.ListItem("Capturada", null, "C"));
+	slbEstado.add(new qx.ui.form.ListItem("Capturada", null, "C"));
 	slbEstado.add(new qx.ui.form.ListItem("Liberada", null, "L"));
 	slbEstado.add(new qx.ui.form.ListItem("Prefacturada", null, "F"));
 	slbEstado.add(new qx.ui.form.ListItem("para Pago", null, "P"));
 	
-	gbxFiltrar.add(slbEstado, {row: 5, column: 1});
+	form.add(slbEstado, "Estado", null, "estado", null, {grupo: 1, item: {row: 5, column: 1, colSpan: 2}});
 	
 	
 	
@@ -197,7 +195,8 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 		aux.setMonth(aux.getMonth() - 1);
 		dtfDesde.setValue(aux);
 		
-		cboPrestador.setSelection([cboPrestador.getChildren()[0]]);
+		lstEPublico.removeAll();
+		cboEPublico.setValue("");
 		
 		lstPaciente.removeAll();
 		cboPaciente.setValue("");
@@ -209,7 +208,7 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 		
 		dtfDesde.focus();
 	})
-	gbxFiltrar.add(btnInicializar, {row: 6, column: 2});
+	form.addButton(btnInicializar, {grupo: 1, item: {row: 6, column: 2}});
 	
 
 	
@@ -217,7 +216,18 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	btnFiltrar.addListener("execute", function(e){
 		functionActualizarSolicitud();
 	})
-	gbxFiltrar.add(btnFiltrar, {row: 6, column: 3});
+	form.addButton(btnFiltrar, {grupo: 1, item: {row: 6, column: 3}});
+	
+	
+	
+	var formView = new componente.comp.ui.ramon.abstractrenderer.Grid(form, 8, 5, 1);
+	var l = formView._getLayout();
+	l.setColumnFlex(1, 1);
+	l.setColumnFlex(2, 1);
+	l.setColumnFlex(3, 1);
+	l.setColumnFlex(4, 1);
+	
+	gbxFiltrar.add(formView);
 	
 	
 	
@@ -335,10 +345,23 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	});
 	
 	
+	var btnWebServices = new qx.ui.menu.Button("consultar Web services...");
+	btnWebServices.setEnabled(false);
+	btnWebServices.addListener("execute", function(e){
+		var win = new sacdiag.comp.windowWebService(rowDataSolicitud.persona_dni);
+		win.setModal(true);
+		application.getRoot().add(win);
+		win.center();
+		win.open();
+	});
+	
+	
 	var menuSolicitud = new componente.comp.ui.ramon.menu.Menu();
 	
 	menuSolicitud.add(btnAutorizar);
 	menuSolicitud.add(btnBloquear);
+	menuSolicitud.addSeparator();
+	menuSolicitud.add(btnWebServices);
 	menuSolicitud.memorizar();
 	
 	
@@ -411,13 +434,15 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 			
 			rowDataSolicitud = tableModelSolicitud.getRowDataAsMap(tblSolicitud.getFocusedRow());
 			
-			controllerFormInfoEntsal.setModel(qx.data.marshal.Json.createModel(rowDataSolicitud));
+			controllerFormInfoEntsal.resetModel();
+			tableModelPrestacion.setDataAsMapArray([], true);
 			
 			btnAutorizar.setEnabled(rowDataSolicitud.estado == "E");
 			btnBloquear.setEnabled(rowDataSolicitud.estado == "B" || rowDataSolicitud.estado == "A");
 			btnBloquear.setLabel((rowDataSolicitud.estado == "B") ? "Desbloquear" : "Bloquear")
+			btnWebServices.setEnabled(true);
 			
-			menuSolicitud.memorizar([btnAutorizar, btnBloquear]);
+			menuSolicitud.memorizar([btnAutorizar, btnBloquear, btnWebServices]);
 			
 			
 			var timer = qx.util.TimerManager.getInstance();
@@ -441,6 +466,8 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 					var data = e.getData();
 					
 					//alert(qx.lang.Json.stringify(data, null, 2));
+					
+					controllerFormInfoEntsal.setModel(qx.data.marshal.Json.createModel(rowDataSolicitud));
 			
 					tableModelPrestacion.setDataAsMapArray(data.result, true);
 				});

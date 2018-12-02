@@ -331,46 +331,30 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	var btnBloquear = new qx.ui.menu.Button("Bloquear...");
 	btnBloquear.setEnabled(false);
 	btnBloquear.addListener("execute", function(e){
-		var focusedRow = tblSolicitud.getFocusedRow();
+		tblSolicitud.blur();
 		
-		var functionBloquear = function() {
-			tableModelSolicitud.setRowsAsMapArray([rowDataSolicitud], focusedRow, true);
+		if (rowDataSolicitud.estado == "E" || rowDataSolicitud.estado == "A") {
 			
-			var p = rowDataSolicitud;
-			
-			var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.Solicitudes");
-			rpc.addListener("completed", function(e){
-				var data = e.getData();
-				
-				//alert(qx.lang.Json.stringify(data, null, 2));
-	
-				tblSolicitud.focus();
-			});
-			rpc.addListener("failed", function(e){
-				var data = e.getData();
-				
-				if (data.message != "sesion_terminada") {
-					alert(qx.lang.Json.stringify(data, null, 2));
-				}
-			});
-			rpc.callAsyncListeners(true, "escribir_solicitud", p);			
-		}
-		
-		
-		
-		if (rowDataSolicitud.estado == "A") {
 			var win = new sacdiag.comp.windowObservar();
 			win.setCaption("Bloquear solicitud");
 			win.setModal(true);
 			win.addListener("aceptado", function(e){
 				var data = e.getData();
 				
-				rowDataSolicitud.estado = "B";
-				rowDataSolicitud.estado_descrip = mapEstado["B"];
-				rowDataSolicitud.estado_condicion = 3;
-				rowDataSolicitud.observaciones_bloqueo = data;
+				tblSolicitud.setFocusedCell();
 				
-				functionBloquear();
+				var p = {};
+				p.id_solicitud = rowDataSolicitud.id_solicitud;
+				p.estado = rowDataSolicitud.estado;
+				p.observaciones_bloqueo = data;
+				
+				var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.Solicitudes");
+				rpc.addListener("completed", function(e){
+					var data = e.getData();
+					
+					functionActualizarSolicitud(rowDataSolicitud.id_solicitud);
+				});
+				rpc.callAsyncListeners(true, "bloquear_solicitud", p);
 			});
 			
 			application.getRoot().add(win);
@@ -381,12 +365,19 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 			(new dialog.Confirm({
 			        "message"   : "Desea desbloquear el item de solicitud seleccionado?",
 			        "callback"  : function(e){
-		        					if (e) {
-										rowDataSolicitud.estado = "A";
-										rowDataSolicitud.estado_descrip = mapEstado["A"];
-										rowDataSolicitud.estado_condicion = 2;
-										rowDataSolicitud.observaciones_bloqueo = "";
-										functionBloquear();
+									if (e) {
+										var p = {};
+										p.id_solicitud = rowDataSolicitud.id_solicitud;
+										
+										tblSolicitud.setFocusedCell();
+										
+										var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.Solicitudes");
+										rpc.addListener("completed", function(e){
+											var data = e.getData();
+											
+											functionActualizarSolicitud(rowDataSolicitud.id_solicitud);
+										});
+										rpc.callAsyncListeners(true, "desbloquear_solicitud", p);
 		        					}
 			        			},
 			        "context"   : this,
@@ -495,8 +486,8 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 			
 			btnCambiarPrestador.setEnabled(rowDataSolicitud.estado == "E" || rowDataSolicitud.estado == "A");
 			btnAutorizar.setEnabled(rowDataSolicitud.estado == "E");
-			btnBloquear.setEnabled(rowDataSolicitud.estado == "B" || rowDataSolicitud.estado == "A");
-			btnBloquear.setLabel((rowDataSolicitud.estado == "B") ? "Desbloquear" : "Bloquear")
+			btnBloquear.setEnabled(rowDataSolicitud.estado == "B" || rowDataSolicitud.estado == "E" || rowDataSolicitud.estado == "A");
+			btnBloquear.setLabel((rowDataSolicitud.estado == "B") ? "Desbloquear" : "Bloquear...")
 			btnWebServices.setEnabled(true);
 			
 			menuSolicitud.memorizar([btnCambiarPrestador, btnAutorizar, btnBloquear, btnWebServices]);

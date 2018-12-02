@@ -36,8 +36,10 @@ qx.Class.define("servicio_social.comp.pageFormularioDeDatos",
 	
 	var cboPaciente = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarPersona"});
 	cboPaciente.setRequired(true);
+	cboPaciente.setMaxHeight(23);
 	form1.add(cboPaciente, "Paciente", null, "cboPaciente", null, {grupo: 1, tabIndex: 1, item: {row: 0, column: 1, colSpan: 17}});
 	cboPaciente.getChildControl("popup").addListener("disappear", function(e){
+		/*
 		if (! lstPaciente.isSelectionEmpty()) {
 			var datos = lstPaciente.getSelection()[0].getUserData("datos");
 			
@@ -60,10 +62,27 @@ qx.Class.define("servicio_social.comp.pageFormularioDeDatos",
 			}, this);
 			rpc.callAsyncListeners(true, "getPuco", p);
 		}
+		*/
 	});
 	
 	var lstPaciente = cboPaciente.getChildControl("list");
+	lstPaciente.addListener("changeSelection", function(e){
+		btnWS.setEnabled(! lstPaciente.isSelectionEmpty());
+	});
 	form1.add(lstPaciente, "", null, "persona_id_paciente");
+	
+	var btnWS = new qx.ui.form.Button("consultar Web services...");
+	btnWS.setEnabled(false);
+	btnWS.addListener("execute", function(e){
+		var datos = lstPaciente.getSelection()[0].getUserData("datos");
+		
+		var win = new servicio_social.comp.windowWebService(datos.persona_dni);
+		win.setModal(true);
+		application.getRoot().add(win);
+		win.center();
+		win.open();
+	});
+	form1.addButton(btnWS, {grupo: 1, tabIndex: 1, item: {row: 0, column: 18}});
 	
 	var cboPersonal = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarPersonal"});
 	cboPersonal.setRequired(true);

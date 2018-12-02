@@ -124,6 +124,27 @@ class class_Solicitudes extends class_Base
 	
 	$this->mysqli->query("COMMIT");
   }
+  
+  
+  public function method_bloquear_solicitud($params, $error) {
+	$p = $params[0];
+	
+		
+	$sql = "UPDATE solicitudes SET observaciones_bloqueo='" . $p->observaciones_bloqueo . "', estado_pre_bloqueo='" . $p->estado . "', fecha_bloqueo=NOW(), id_usuario_bloqueo='" . $_SESSION['login']->id_oas_usuario . "', estado='B' WHERE id_solicitud=" . $p->id_solicitud;
+	$this->mysqli->query($sql);
+	
+	$this->auditoria($sql, __FILE__ . ", " . __FUNCTION__);
+  }
+  
+  
+  public function method_desbloquear_solicitud($params, $error) {
+	$p = $params[0];
+	
+	$sql = "UPDATE solicitudes SET observaciones_bloqueo='', estado=estado_pre_bloqueo WHERE id_solicitud=" . $p->id_solicitud;
+	$this->mysqli->query($sql);
+	
+	$this->auditoria($sql, __FILE__ . ", " . __FUNCTION__);
+  }
 }
 
 

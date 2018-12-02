@@ -34,8 +34,9 @@ class class_TA_Solicitudes extends class_Base
 	}
 	
 	if (! is_null($p->persona_id_paciente)) $sql.= " AND persona_id_paciente='" . $p->persona_id_paciente . "'";
+	if (! is_null($p->id_efector_publico)) $sql.= " AND organismo_area_id_efector_publico='" . $p->id_efector_publico . "'";
 	if (! is_null($p->id_personal_medico)) $sql.= " AND id_personal_medico='" . $p->id_personal_medico . "'";
-	//if (empty($p->estado)) $sql.= " AND estado <> 'C'"; else $sql.= " AND estado='" . $p->estado . "'";
+	if (! empty($p->estado)) $sql.= " AND estado='" . $p->estado . "'";
 	
 	$sql.= " ORDER BY f_emite DESC";
 	
