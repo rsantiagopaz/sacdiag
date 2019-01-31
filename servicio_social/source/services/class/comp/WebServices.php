@@ -225,6 +225,8 @@ class class_WebServices
 	
 		$curl = curl_init();
 		/*******************************************OPCIONES*************************/
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false); //desactivando control de certificado
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($curl, CURLOPT_POST, 1);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $data); //si requiere autenticación
 		curl_setopt($curl, CURLOPT_URL, $url);
@@ -237,12 +239,33 @@ class class_WebServices
 	
 		/*******************************************EJECUCION************************/
 		$result = curl_exec($curl);
+		$curl_error = curl_error($curl);
+		
+		curl_close($curl);
+		
+		if(! $result){
+			if(! $p->dni){
+				$error->SetError(0, "Debe ingresar DNI");
+				return $error;
+			}
+			else{
+				$error->SetError(0, $curl_error);
+				return $error;
+			}
+	
+		}
+		
+		
+		
 		$datos = simplexml_load_string($result);
 		
 		$resultado->datos = $datos;
 		$resultado->texto = chr(13);
 		
-		if ($datos->resultado == "OK") {
+		if ($datos === false) {
+			$error->SetError(0, $curl_error);
+			return $error;
+		} else if ($datos->resultado == "OK") {
 			$resultado->texto.= "Cobertura social: " . $datos->coberturaSocial . chr(13);
 			$resultado->texto.= "Denominación: " . $datos->denominacion . chr(13);
 			$resultado->texto.= "Nro.doc.: " . $datos->nrodoc . chr(13);
@@ -253,7 +276,7 @@ class class_WebServices
 		}
 		
 		return $resultado;
-	}
+  }
 	
 	
   public function method_getPuco2($params, $error) {

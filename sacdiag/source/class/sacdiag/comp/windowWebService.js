@@ -92,7 +92,7 @@ qx.Class.define("sacdiag.comp.windowWebService",
 			
 			//alert(qx.lang.Json.stringify(data, null, 2));
 			
-			txtDatos.setValue("\nError de comunicación. Intente de nuevo.");
+			txtDatos.setValue("\nError. Intente de nuevo.\n\n" + data.message);
 		}, this);
 		
 		if (slbWebService.getSelection()[0].getModel()=="puco") rpc.callAsyncListeners(true, "getPuco1", p);
