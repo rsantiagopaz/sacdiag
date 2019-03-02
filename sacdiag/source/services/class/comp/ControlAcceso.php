@@ -20,6 +20,15 @@ class class_ControlAcceso
 		$this->mysqli = new mysqli("$servidor", "$usuario", "$password", "$base");
 		$this->mysqli->query("SET NAMES 'utf8'");
 	}
+	
+	
+  public function method_leer_version($params, $error) {
+  	
+  	$aux = new stdClass;
+  	$aux->id_version = 1;
+	
+	return $aux;
+  }
 
 
   public function method_login($params, $error) {

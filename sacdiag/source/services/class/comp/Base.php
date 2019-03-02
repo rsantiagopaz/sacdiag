@@ -4,6 +4,7 @@ class class_Base
 {
 	protected $mysqli;
 	
+	
 	function __construct() {
 		require('Conexion.php');
 		
@@ -45,6 +46,7 @@ class class_Base
 			}
 		}
 	}
+	
 	
 	
   public function toJson($paramet, &$opciones = null) {

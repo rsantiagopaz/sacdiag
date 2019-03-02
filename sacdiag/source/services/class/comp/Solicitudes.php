@@ -23,7 +23,7 @@ class class_Solicitudes extends class_Base
 	
 	$resultado = array();
 	
-	$sql = "SELECT solicitudes.id_solicitud, solicitudes.fecha_emite, solicitudes.estado, solicitudes.id_efector_publico, solicitudes.id_prestador_fantasia, _personas.persona_nombre, _personas.persona_dni FROM solicitudes INNER JOIN _personas USING(persona_id) WHERE TRUE";
+	$sql = "SELECT solicitudes.id_solicitud, solicitudes.fecha_emite, solicitudes.estado, solicitudes.id_efector_publico, solicitudes.id_prestador_fantasia, _personas.persona_id, _personas.persona_nombre, _personas.persona_dni FROM solicitudes INNER JOIN _personas USING(persona_id) WHERE TRUE";
 	
 	if (! is_null($p->desde) && ! is_null($p->hasta)) {
 		$sql.= " AND (fecha_emite BETWEEN '" . substr($p->desde, 0, 10) . "' AND '" . substr($p->hasta, 0, 10) . "')";
@@ -92,7 +92,7 @@ class class_Solicitudes extends class_Base
 	
 	
 	
-	$sql = "SELECT id_usuario_medico, informacion_clinica, observaciones, observaciones_bloqueo, anses_negativa FROM solicitudes WHERE id_solicitud=" . $p->id_solicitud;
+	$sql = "SELECT id_usuario_medico, informacion_clinica, observaciones, observaciones_bloqueo, observaciones_aprueba, anses_negativa FROM solicitudes WHERE id_solicitud=" . $p->id_solicitud;
 	$rs = $this->mysqli->query($sql);
 	$row = $rs->fetch_object();
 	
@@ -129,52 +129,67 @@ class class_Solicitudes extends class_Base
   public function method_bloquear_solicitud($params, $error) {
 	$p = $params[0];
 	
+	$this->mysqli->query("START TRANSACTION");
 		
 	$sql = "UPDATE solicitudes SET observaciones_bloqueo='" . $p->observaciones_bloqueo . "', estado_pre_bloqueo='" . $p->estado . "', fecha_bloqueo=NOW(), id_usuario_bloqueo='" . $_SESSION['login']->id_oas_usuario . "', estado='B' WHERE id_solicitud=" . $p->id_solicitud;
 	$this->mysqli->query($sql);
 	
 	$this->auditoria($sql, __FILE__ . ", " . __FUNCTION__);
+	
+	$this->mysqli->query("COMMIT");
   }
   
   
   public function method_desbloquear_solicitud($params, $error) {
 	$p = $params[0];
 	
+	$this->mysqli->query("START TRANSACTION");
+	
 	$sql = "UPDATE solicitudes SET observaciones_bloqueo='', estado=estado_pre_bloqueo WHERE id_solicitud=" . $p->id_solicitud;
 	$this->mysqli->query($sql);
 	
 	$this->auditoria($sql, __FILE__ . ", " . __FUNCTION__);
+	
+	$this->mysqli->query("COMMIT");
+  }
+  
+  
+  public function method_aprobar_solicitud($params, $error) {
+	$p = $params[0];
+	
+	$sql = "SELECT id_solicitud FROM solicitudes WHERE id_solicitud=" . $p->id_solicitud . " AND estado='" . $p->estado . "'";
+	$rs = $this->mysqli->query($sql);
+	if ($rs->num_rows > 0) {
+		
+		$this->mysqli->query("START TRANSACTION");
+		
+		$sql = "UPDATE solicitudes SET observaciones_aprueba='" . $p->observaciones_aprueba . "',  	fecha_aprueba=NOW(), id_usuario_aprueba='" . $_SESSION['login']->id_oas_usuario . "', estado='A' WHERE id_solicitud=" . $p->id_solicitud;
+		$this->mysqli->query($sql);
+	
+		$this->auditoria($sql, __FILE__ . ", " . __FUNCTION__);
+		
+		$this->mysqli->query("COMMIT");
+	}
+  }
+  
+  
+  public function method_eliminar_solicitud($params, $error) {
+	$p = $params[0];
+	
+	$sql = "SELECT id_solicitud FROM solicitudes WHERE id_solicitud=" . $p->id_solicitud . " AND estado='" . $p->estado . "'";
+	$rs = $this->mysqli->query($sql);
+	if ($rs->num_rows > 0) {
+		
+		$this->mysqli->query("START TRANSACTION");
+
+		$sql = "DELETE FROM solicitudes WHERE id_solicitud=" . $p->id_solicitud;
+		$this->mysqli->query($sql);
+
+		$this->auditoria($sql, __FILE__ . ", " . __FUNCTION__);
+
+		$this->mysqli->query("COMMIT");
+	}
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ?>

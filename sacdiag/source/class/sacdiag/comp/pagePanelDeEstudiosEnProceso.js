@@ -1,18 +1,55 @@
 qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 {
 	extend : qx.ui.tabview.Page,
-	construct : function ()
+	construct : function (rowData)
 	{
 	this.base(arguments);
 
 	this.setLabel('Panel de Estudios en Proceso');
-	this.toggleShowCloseButton();
+	if (rowData) this.toggleShowCloseButton();
 	this.setLayout(new qx.ui.layout.Canvas());
 	
 	this.addListenerOnce("appear", function(e){
+		if (rowData) {
+			var aux;
+			
+			aux = rowData.fecha_emite;
+			aux = new Date(aux.getFullYear(), aux.getMonth(), aux.getDate());
+			dtfHasta.setValue(aux);
+			aux.setMonth(aux.getMonth() - 6);
+			dtfDesde.setValue(aux);
+			
+			aux = rowData.persona_nombre + " (" + rowData.persona_dni + ")";
+			
+			this.setLabel("historial " + aux);
+			
+			aux = new qx.ui.form.ListItem(aux, null, rowData.persona_id);
+			lstPaciente.add(aux);
+			lstPaciente.setSelection([aux]);
+			
+			cboEPublico.setVisibility("excluded");
+			cboPrestador.setVisibility("excluded");
+			cboPersonal.setVisibility("excluded");
+			slbEstado.setVisibility("excluded");
+			btnInicializar.setVisibility("excluded");
+			btnFiltrar.setVisibility("excluded");
+			
+			dtfDesde.getChildControl("textfield").setReadOnly(true);
+			dtfDesde.getChildControl("button").setEnabled(false);
+			
+			dtfHasta.getChildControl("textfield").setReadOnly(true);
+			dtfHasta.getChildControl("button").setEnabled(false);
+			
+			cboPaciente.getChildControl("textfield").setReadOnly(true);
+			cboPaciente.getChildControl("button").setEnabled(false);
+			
+			tblSolicitud.focus();
+		} else {
+			dtfDesde.focus();
+		}
+		
 		btnFiltrar.execute();
-		dtfDesde.focus();
-	});
+	}, this);
 	
 	
 	var application = qx.core.Init.getApplication();
@@ -40,8 +77,10 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 		btnCambiarPrestador.setEnabled(false);
 		btnAutorizar.setEnabled(false);
 		btnBloquear.setEnabled(false);
+		btnEliminar.setEnabled(false);
 		btnWebServices.setEnabled(false);
-		menuSolicitud.memorizar([btnCambiarPrestador, btnAutorizar, btnBloquear, btnWebServices]);
+		btnHistorial.setEnabled(false);
+		menuSolicitud.memorizar([btnCambiarPrestador, btnAutorizar, btnBloquear, btnEliminar, btnWebServices, btnHistorial]);
 		
 		controllerFormInfoEntsal.resetModel();
 		
@@ -289,43 +328,38 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	var btnAutorizar = new qx.ui.menu.Button("Aprobar...");
 	btnAutorizar.setEnabled(false);
 	btnAutorizar.addListener("execute", function(e){
-		(new dialog.Confirm({
-		        "message"   : "Desea aprobar la solicitud seleccionada?",
-		        "callback"  : function(e){
-	        					if (e) {
-									var focusedRow = tblSolicitud.getFocusedRow();
-									
-									tblSolicitud.blur();
-									
-									rowDataSolicitud.estado = "A";
-									rowDataSolicitud.estado_descrip = mapEstado["A"];
-									rowDataSolicitud.estado_condicion = 2;
-									
-									tableModelSolicitud.setRowsAsMapArray([rowDataSolicitud], focusedRow, true);
-									
-									var p = rowDataSolicitud;
-									
-									var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.Solicitudes");
-									rpc.addListener("completed", function(e){
-										var data = e.getData();
-										
-										//alert(qx.lang.Json.stringify(data, null, 2));
-										
-										tblSolicitud.focus();
-									});
-									rpc.addListener("failed", function(e){
-										var data = e.getData();
-										
-										if (data.message != "sesion_terminada") {
-											alert(qx.lang.Json.stringify(data, null, 2));
-										}
-									});
-									rpc.callAsyncListeners(true, "escribir_solicitud", p);
-	        					}
-		        			},
-		        "context"   : this,
-		        "image"     : "icon/48/status/dialog-warning.png"
-		})).show();
+		tblSolicitud.blur();
+		
+		var win = new sacdiag.comp.windowObservar();
+		win.setCaption("Aprobar solicitud");
+		win.setModal(true);
+		win.addListener("aceptado", function(e){
+			var data = e.getData();
+			
+			tblSolicitud.setFocusedCell();
+			
+			var p = {};
+			p.id_solicitud = rowDataSolicitud.id_solicitud;
+			p.estado = rowDataSolicitud.estado;
+			p.observaciones_aprueba = data;
+			
+			var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.Solicitudes");
+			rpc.addListener("completed", function(e){
+				var data = e.getData();
+				
+				functionActualizarSolicitud(rowDataSolicitud.id_solicitud);
+			});
+			rpc.addListener("failed", function(e){
+				var data = e.getData();
+				
+				alert(qx.lang.Json.stringify(data, null, 2));
+			});
+			rpc.callAsyncListeners(true, "aprobar_solicitud", p);
+		});
+		
+		application.getRoot().add(win);
+		win.center();
+		win.open();
 	});
 	
 	var btnBloquear = new qx.ui.menu.Button("Bloquear...");
@@ -387,6 +421,41 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	});
 	
 	
+	var btnEliminar = new qx.ui.menu.Button("Eliminar...");
+	btnEliminar.setEnabled(false);
+	btnEliminar.addListener("execute", function(e){
+		(new dialog.Confirm({
+				"message"   : "Desea eliminar la solicitud seleccionada?",
+				"callback"  : function(e){
+								if (e) {
+									tblSolicitud.blur();
+									
+									var p = {};
+									p.id_solicitud = rowDataSolicitud.id_solicitud;
+									p.estado = rowDataSolicitud.estado;
+									
+									var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.Solicitudes");
+									rpc.addListener("completed", function(e){
+										var data = e.getData();
+										
+										//alert(qx.lang.Json.stringify(data, null, 2));
+										
+										functionActualizarSolicitud(rowDataSolicitud.id_solicitud);
+									});
+									rpc.addListener("failed", function(e){
+										var data = e.getData();
+										
+										//alert(qx.lang.Json.stringify(data, null, 2));
+									});
+									rpc.callAsyncListeners(true, "eliminar_solicitud", p);
+								}
+							},
+				"context"   : this,
+				"image"     : "icon/48/status/dialog-warning.png"
+		})).show();
+	});
+	
+	
 	var btnWebServices = new qx.ui.menu.Button("consultar Web services...");
 	btnWebServices.addListener("execute", function(e){
 		var win = new sacdiag.comp.windowWebService(rowDataSolicitud.persona_dni);
@@ -396,6 +465,13 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 		win.open();
 	});
 	
+	var btnHistorial = new qx.ui.menu.Button("consultar historial (6 meses)...");
+	btnHistorial.addListener("execute", function(e){
+		var aux = new sacdiag.comp.pagePanelDeEstudiosEnProceso(rowDataSolicitud);
+		application.tabviewMain.add(aux);
+		application.tabviewMain.setSelection([aux]);
+	});
+	
 	
 	var menuSolicitud = new componente.comp.ui.ramon.menu.Menu();
 	
@@ -403,7 +479,10 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	menuSolicitud.add(btnAutorizar);
 	menuSolicitud.add(btnBloquear);
 	menuSolicitud.addSeparator();
+	menuSolicitud.add(btnEliminar);
+	menuSolicitud.addSeparator();
 	menuSolicitud.add(btnWebServices);
+	menuSolicitud.add(btnHistorial);
 	menuSolicitud.memorizar();
 	
 	
@@ -437,7 +516,7 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	tblSolicitud.setShowCellFocusIndicator(false);
 	tblSolicitud.toggleColumnVisibilityButtonVisible();
 	//tbl.setRowHeight(45);
-	tblSolicitud.setContextMenu(menuSolicitud);
+	if (! rowData) tblSolicitud.setContextMenu(menuSolicitud);
 
 	
 	var tableColumnModelSolicitud = tblSolicitud.getTableColumnModel();
@@ -488,9 +567,11 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 			btnAutorizar.setEnabled(rowDataSolicitud.estado == "E");
 			btnBloquear.setEnabled(rowDataSolicitud.estado == "B" || rowDataSolicitud.estado == "E" || rowDataSolicitud.estado == "A");
 			btnBloquear.setLabel((rowDataSolicitud.estado == "B") ? "Desbloquear" : "Bloquear...")
+			btnEliminar.setEnabled(rowDataSolicitud.estado == "L");
 			btnWebServices.setEnabled(true);
+			btnHistorial.setEnabled(true);
 			
-			menuSolicitud.memorizar([btnCambiarPrestador, btnAutorizar, btnBloquear, btnWebServices]);
+			menuSolicitud.memorizar([btnCambiarPrestador, btnAutorizar, btnBloquear, btnEliminar, btnWebServices, btnHistorial]);
 			
 			
 			var timer = qx.util.TimerManager.getInstance();
@@ -551,13 +632,13 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	aux.setReadOnly(true);
 	aux.setDecorator("main");
 	aux.setBackgroundColor("#ffffc0");
-	formInfoEntsal.add(aux, "Observaciones", null, "observaciones");
+	formInfoEntsal.add(aux, "Obs.aprob.", null, "observaciones_aprueba");
 	
-	var aux = new qx.ui.form.TextField("");
+	var aux = new qx.ui.form.TextArea("");
 	aux.setReadOnly(true);
 	aux.setDecorator("main");
 	aux.setBackgroundColor("#ffffc0");
-	formInfoEntsal.add(aux, "Médico", null, "medico_descrip");
+	formInfoEntsal.add(aux, "Observaciones", null, "observaciones");
 	
 	var aux = new qx.ui.form.TextArea("");
 	aux.setReadOnly(true);
@@ -570,6 +651,12 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	aux.setDecorator("main");
 	aux.setBackgroundColor("#ffffc0");
 	formInfoEntsal.add(aux, "Cert.neg.ANSES", null, "anses_negativa");
+	
+	var aux = new qx.ui.form.TextField("");
+	aux.setReadOnly(true);
+	aux.setDecorator("main");
+	aux.setBackgroundColor("#ffffc0");
+	formInfoEntsal.add(aux, "Médico", null, "medico_descrip");
 	
 	var aux = new qx.ui.form.TextArea("");
 	aux.setReadOnly(true);

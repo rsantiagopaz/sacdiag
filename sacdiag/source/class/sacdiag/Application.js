@@ -64,24 +64,39 @@ qx.Class.define("sacdiag.Application",
 	
 
 	
+	var id_version = 1;
 	
-	var win = new sacdiag.comp.windowLogin();
-	win.setModal(true);
-	win.addListenerOnce("appear", function(e){
-		win.center();
-	});
-	win.addListener("aceptado", function(e){
-		var data = e.getData();
-		
-		this.login = data;
-		//alert(qx.lang.Json.stringify(data, null, 2));
-		
-		this._InitAPP();
-	}, this)
-	//doc.add(win);
-	//win.center();
-	win.open();
+	var rpc = new qx.io.remote.Rpc("services/", "comp.ControlAcceso");
+	try {
+		var resultado = rpc.callSync("leer_version");
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
 	
+	if (id_version == resultado.id_version) {
+		qx.event.Timer.once(function(){
+			var win = new sacdiag.comp.windowLogin();
+			win.setModal(true);
+			win.addListener("aceptado", function(e){
+				var data = e.getData();
+		
+				this.login = data;
+				
+				qx.event.Timer.once(function(){
+					this.initApp();
+				}, this, 20);
+			}, this);
+			
+			doc.add(win);
+			win.center();
+			win.open();
+		}, this, 20);
+		
+	} else {
+		alert("Presione F5 para actualizar aplicación. Si el problema persiste comunicarse con servicio técnico.");
+		
+		location.reload(true);
+	}
 	
 	
 	
@@ -89,11 +104,12 @@ qx.Class.define("sacdiag.Application",
 	
     },
     
-	_InitAPP : function ()
+	initApp : function ()
 	{
 		
       // Document is the application root
 	var doc = this.getRoot();
+	
 	doc.set({blockerColor: '#bfbfbf', blockerOpacity: 0.4});
 	
 	
