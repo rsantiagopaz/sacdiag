@@ -69,13 +69,13 @@ qx.Class.define("sacdiag.comp.windowWebService",
 		rpc.addListener("completed", function(e){
 			var data = e.getData();
 			
+			//alert(qx.lang.Json.stringify(data, null, 2));
+			
 			loading.hide();
 			
 			txtDni.setEnabled(true);
 			slbWebService.setEnabled(true);
 			btnConsultar.setEnabled(true);
-			
-			//alert(qx.lang.Json.stringify(data, null, 2));
 			
 			txtDatos.setValue(data.result.texto);
 			//txtDatos.setValue(qx.lang.Json.stringify(data.result, null, 2));
@@ -84,13 +84,13 @@ qx.Class.define("sacdiag.comp.windowWebService",
 		rpc.addListener("failed", function(e){
 			var data = e.getData();
 			
+			//alert(qx.lang.Json.stringify(data, null, 2));
+			
 			loading.hide();
 			
 			txtDni.setEnabled(true);
 			slbWebService.setEnabled(true);
 			btnConsultar.setEnabled(true);
-			
-			//alert(qx.lang.Json.stringify(data, null, 2));
 			
 			txtDatos.setValue("\nError. Intente de nuevo.\n\n" + data.message);
 		}, this);

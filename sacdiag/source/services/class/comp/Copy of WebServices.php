@@ -266,11 +266,11 @@ class class_WebServices
 			$error->SetError(0, $curl_error);
 			return $error;
 		} else if ($datos->resultado == "OK") {
-			$resultado->texto.= "Cobertura social: " . $datos->puco->coberturaSocial . chr(13);
-			$resultado->texto.= "Denominación: " . $datos->puco->denominacion . chr(13);
-			$resultado->texto.= "Nro.doc.: " . $datos->puco->nrodoc . chr(13);
-			//$resultado->texto.= "R.N.O.S.: " . $datos->puco->rnos . chr(13);
-			$resultado->texto.= "Tipo doc.: " . $datos->puco->tipodoc . chr(13);
+			$resultado->texto.= "Cobertura social: " . $datos->coberturaSocial . chr(13);
+			$resultado->texto.= "Denominación: " . $datos->denominacion . chr(13);
+			$resultado->texto.= "Nro.doc.: " . $datos->nrodoc . chr(13);
+			$resultado->texto.= "R.N.O.S.: " . $datos->rnos . chr(13);
+			$resultado->texto.= "Tipo doc.: " . $datos->tipodoc . chr(13);
 		} else {
 			$resultado->texto.= $datos->resultado;
 		}
