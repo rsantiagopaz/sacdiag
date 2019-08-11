@@ -25,7 +25,7 @@ class class_ControlAcceso
   public function method_leer_version($params, $error) {
   	
   	$aux = new stdClass;
-  	$aux->id_version = 1;
+  	$aux->id_version = 2;
 	
 	return $aux;
   }

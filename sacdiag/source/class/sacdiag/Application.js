@@ -64,7 +64,7 @@ qx.Class.define("sacdiag.Application",
 	
 
 	
-	var id_version = 1;
+	var id_version = 2;
 	
 	var rpc = new qx.io.remote.Rpc("services/", "comp.ControlAcceso");
 	try {
@@ -192,7 +192,7 @@ qx.Class.define("sacdiag.Application",
 	mnuEdicion.add(btnControlDePrefacturaciones);
 	
 	
-	var btnTrasladoyAlojamiento = new qx.ui.menu.Button("Traslado y Alojamiento...");
+	var btnTrasladoyAlojamiento = new qx.ui.menu.Button("Panel de Traslado y Alojamiento...");
 	btnTrasladoyAlojamiento.addListener("execute", function(){
 		if (pageMain["pageTrasladoyAlojamiento"] == null) {
 			pageMain["pageTrasladoyAlojamiento"] = new sacdiag.comp.pageTrasladoyAlojamiento();
@@ -206,6 +206,35 @@ qx.Class.define("sacdiag.Application",
 	mnuEdicion.add(btnTrasladoyAlojamiento);
 	
 	
+	var btnMedicamentos = new qx.ui.menu.Button("Panel de Medicamentos (Preliminar, en prueba) ...");
+	btnMedicamentos.addListener("execute", function(){
+		if (pageMain["pageMedicamentos"] == null) {
+			pageMain["pageMedicamentos"] = new sacdiag.comp.pageMedicamentos();
+			pageMain["pageMedicamentos"].addListenerOnce("close", function(e){
+				pageMain["pageMedicamentos"] = null;
+			});
+			tabviewMain.add(pageMain["pageMedicamentos"]);
+		}
+		tabviewMain.setSelection([pageMain["pageMedicamentos"]]);
+	});
+	mnuEdicion.add(btnMedicamentos);
+	
+	
+	mnuEdicion.addSeparator();
+	
+	
+	var btnABMPrestadores = new qx.ui.menu.Button("ABM Prestadores...");
+	btnABMPrestadores.addListener("execute", function(){
+		if (pageMain["pageABMprestadores"] == null) {
+			pageMain["pageABMprestadores"] = new sacdiag.comp.pageABMprestadores();
+			pageMain["pageABMprestadores"].addListenerOnce("close", function(e){
+				pageMain["pageABMprestadores"] = null;
+			});
+			tabviewMain.add(pageMain["pageABMprestadores"]);
+		}
+		tabviewMain.setSelection([pageMain["pageABMprestadores"]]);
+	});
+	mnuEdicion.add(btnABMPrestadores);
 	mnuEdicion.addSeparator();
 	
 	
@@ -223,19 +252,6 @@ qx.Class.define("sacdiag.Application",
 	mnuEdicion.add(btnABMPrestaciones);
 	
 	
-	var btnABMPrestadores = new qx.ui.menu.Button("ABM Prestadores...");
-	btnABMPrestadores.addListener("execute", function(){
-		if (pageMain["pageABMprestadores"] == null) {
-			pageMain["pageABMprestadores"] = new sacdiag.comp.pageABMprestadores();
-			pageMain["pageABMprestadores"].addListenerOnce("close", function(e){
-				pageMain["pageABMprestadores"] = null;
-			});
-			tabviewMain.add(pageMain["pageABMprestadores"]);
-		}
-		tabviewMain.setSelection([pageMain["pageABMprestadores"]]);
-	});
-	mnuEdicion.add(btnABMPrestadores);
-	
 	
 	var btnABMTAPrestaciones = new qx.ui.menu.Button("ABM Traslado y Alojamiento prestaciones...");
 	btnABMTAPrestaciones.addListener("execute", function(){
@@ -249,6 +265,20 @@ qx.Class.define("sacdiag.Application",
 		tabviewMain.setSelection([pageMain["btnABMTAPrestaciones"]]);
 	});
 	mnuEdicion.add(btnABMTAPrestaciones);
+	
+	
+	var btnABMMedicamentos = new qx.ui.menu.Button("ABM Medicamentos (Preliminar, en prueba) ...");
+	btnABMMedicamentos.addListener("execute", function(){
+		if (pageMain["btnABMMedicamentos"] == null) {
+			pageMain["btnABMMedicamentos"] = new sacdiag.comp.pageABMMedicamentos();
+			pageMain["btnABMMedicamentos"].addListenerOnce("close", function(e){
+				pageMain["btnABMMedicamentos"] = null;
+			});
+			tabviewMain.add(pageMain["btnABMMedicamentos"]);
+		}
+		tabviewMain.setSelection([pageMain["btnABMMedicamentos"]]);
+	});
+	mnuEdicion.add(btnABMMedicamentos);
 	
 	
 	mnuEdicion.addSeparator();

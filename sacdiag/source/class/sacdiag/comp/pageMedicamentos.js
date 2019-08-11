@@ -1,11 +1,11 @@
-qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
+qx.Class.define("sacdiag.comp.pageMedicamentos",
 {
 	extend : qx.ui.tabview.Page,
 	construct : function ()
 	{
 	this.base(arguments);
 
-	this.setLabel('Panel de Traslado y Alojamiento');
+	this.setLabel('Panel de Medicamentos');
 	this.toggleShowCloseButton();
 	this.setLayout(new qx.ui.layout.Canvas());
 	
@@ -19,20 +19,20 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	
 	var rowDataSolicitud;
 	var mapEstado = {
-		"E" : "Emitida",
-		"A" : "Aprobada",
-		"B" : "Bloqueada",
-		"C" : "Capturada",
-		"L" : "Liberada",
-		"F" : "Prefacturada",
-		"P" : "para Pago"
+		"EH" : "Emitida Hospital",
+		"AS" : "Autorizada Ser.Soc.Min.",
+		"DS" : "Denegada Ser.Soc.Min.",
+		"AA" : "Autorizada Aud.Med.Min.",
+		"DA" : "Denegada Aud.Med.Min.",
+		"EF" : "Entregada Farmacia",
+		"DF" : "Denegada Farmacia"
 	};
 	
 	
 	
 	
 	
-	var functionActualizarSolicitud = function(id_ta_solicitud) {
+	var functionActualizarSolicitud = function(id_m_solicitud) {
 		
 		tblSolicitud.setFocusedCell();
 		tableModelPrestacion.setDataAsMapArray([], true);
@@ -63,13 +63,13 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 			p.desde = dtfDesde.getValue();
 			p.hasta = dtfHasta.getValue();
 			if (! lstPaciente.isSelectionEmpty()) p.persona_id_paciente = lstPaciente.getSelection()[0].getModel();
-			if (! lstEPublico.isSelectionEmpty()) p.id_efector_publico = lstEPublico.getSelection()[0].getModel();
+			//if (! lstEPublico.isSelectionEmpty()) p.id_efector_publico = lstEPublico.getSelection()[0].getModel();
 			if (! lstPersonal.isSelectionEmpty()) p.id_personal_medico = lstPersonal.getSelection()[0].getModel();
 			p.estado = slbEstado.getSelection()[0].getModel();
 			
 			//alert(qx.lang.Json.stringify(p, null, 2));
 			
-			this.rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.TA_Solicitudes");
+			this.rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
 			this.rpc.addListener("completed", function(e){
 				var data = e.getData();
 				
@@ -77,9 +77,9 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	
 				tableModelSolicitud.setDataAsMapArray(data.result, true);
 				
-				if (id_ta_solicitud != null) {
+				if (id_m_solicitud != null) {
 					tblSolicitud.blur();
-					tblSolicitud.buscar("id_ta_solicitud", id_ta_solicitud);
+					tblSolicitud.buscar("id_m_solicitud", id_m_solicitud);
 					tblSolicitud.focus();
 				}
 			});
@@ -150,7 +150,7 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 		var data = e.getData();
 		
 	});
-	form.add(cboEPublico, "Ef.público", null, "id_efector_publico", null, {grupo: 1, item: {row: 3, column: 1, colSpan: 4}});
+	//form.add(cboEPublico, "Ef.público", null, "id_efector_publico", null, {grupo: 1, item: {row: 3, column: 1, colSpan: 4}});
 	
 	
 	
@@ -176,13 +176,15 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	
 	var slbEstado = new qx.ui.form.SelectBox();
 	slbEstado.add(new qx.ui.form.ListItem("-", null, ""));
-	slbEstado.add(new qx.ui.form.ListItem("Emitida", null, "E"));
-	slbEstado.add(new qx.ui.form.ListItem("Aprobada", null, "A"));
-	slbEstado.add(new qx.ui.form.ListItem("Bloqueada", null, "B"));
-	slbEstado.add(new qx.ui.form.ListItem("Capturada", null, "C"));
-	slbEstado.add(new qx.ui.form.ListItem("Liberada", null, "L"));
-	slbEstado.add(new qx.ui.form.ListItem("Prefacturada", null, "F"));
-	slbEstado.add(new qx.ui.form.ListItem("para Pago", null, "P"));
+	slbEstado.add(new qx.ui.form.ListItem("Emitida Hospital", null, "EH"));
+	slbEstado.add(new qx.ui.form.ListItem("Autorizada Ser.Soc.Min.", null, "AS"));
+	slbEstado.add(new qx.ui.form.ListItem("Denegada Ser.Soc.Min.", null, "DS"));
+	slbEstado.add(new qx.ui.form.ListItem("Autorizada Aud.Med.Min.", null, "AA"));
+	slbEstado.add(new qx.ui.form.ListItem("Denegada Aud.Med.Min.", null, "DA"));
+	slbEstado.add(new qx.ui.form.ListItem("Entregada Farmacia", null, "EF"));
+	slbEstado.add(new qx.ui.form.ListItem("Denegada Farmacia", null, "DF"));
+	
+	
 	
 	form.add(slbEstado, "Estado", null, "estado", null, {grupo: 1, item: {row: 5, column: 1, colSpan: 2}});
 	
@@ -235,26 +237,27 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	
 	// Menu
 	
-	var btnAutorizar = new qx.ui.menu.Button("Aprobar...");
+	var btnAutorizar = new qx.ui.menu.Button("Autorizar...");
 	btnAutorizar.setEnabled(false);
 	btnAutorizar.addListener("execute", function(e){
 		(new dialog.Confirm({
-		        "message"   : "Desea aprobar la solicitud seleccionada?",
+		        "message"   : "Desea autorizar la solicitud seleccionada?",
 		        "callback"  : function(e){
 	        					if (e) {
 									var focusedRow = tblSolicitud.getFocusedRow();
 									
 									tblSolicitud.blur();
 									
-									rowDataSolicitud.estado = "A";
-									rowDataSolicitud.estado_descrip = mapEstado["A"];
+									rowDataSolicitud.estado = "AA";
+									rowDataSolicitud.estado_descrip = mapEstado["AA"];
 									rowDataSolicitud.estado_condicion = 2;
 									
 									tableModelSolicitud.setRowsAsMapArray([rowDataSolicitud], focusedRow, true);
 									
 									var p = rowDataSolicitud;
 									
-									var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.TA_Solicitudes");
+									var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
+									rpc.mostrar = false;
 									rpc.addListener("completed", function(e){
 										var data = e.getData();
 										
@@ -277,71 +280,47 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 		})).show();
 	});
 	
-	var btnBloquear = new qx.ui.menu.Button("Bloquear...");
+	var btnBloquear = new qx.ui.menu.Button("Denegar...");
 	btnBloquear.setEnabled(false);
 	btnBloquear.addListener("execute", function(e){
-		var focusedRow = tblSolicitud.getFocusedRow();
-		
-		var functionBloquear = function() {
-			tableModelSolicitud.setRowsAsMapArray([rowDataSolicitud], focusedRow, true);
-			
-			var p = rowDataSolicitud;
-			
-			var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.TA_Solicitudes");
-			rpc.addListener("completed", function(e){
-				var data = e.getData();
-				
-				//alert(qx.lang.Json.stringify(data, null, 2));
-	
-				tblSolicitud.focus();
-			});
-			rpc.addListener("failed", function(e){
-				var data = e.getData();
-				
-				if (data.message != "sesion_terminada") {
-					alert(qx.lang.Json.stringify(data, null, 2));
-				}
-			});
-			rpc.callAsyncListeners(true, "escribir_solicitud", p);			
-		}
-		
-		
-		
-		if (rowDataSolicitud.estado == "A") {
-			var win = new sacdiag.comp.windowObservar();
-			win.setCaption("Bloquear solicitud");
-			win.setModal(true);
-			win.addListener("aceptado", function(e){
-				var data = e.getData();
-				
-				rowDataSolicitud.estado = "B";
-				rowDataSolicitud.estado_descrip = mapEstado["B"];
-				rowDataSolicitud.estado_condicion = 3;
-				rowDataSolicitud.observaciones_bloqueo = data;
-				
-				functionBloquear();
-			});
-			
-			application.getRoot().add(win);
-			win.center();
-			win.open();
-		} else {
-			
-			(new dialog.Confirm({
-			        "message"   : "Desea desbloquear el item de solicitud seleccionado?",
-			        "callback"  : function(e){
-		        					if (e) {
-										rowDataSolicitud.estado = "A";
-										rowDataSolicitud.estado_descrip = mapEstado["A"];
-										rowDataSolicitud.estado_condicion = 2;
-										rowDataSolicitud.observaciones_bloqueo = "";
-										functionBloquear();
-		        					}
-			        			},
-			        "context"   : this,
-			        "image"     : "icon/48/status/dialog-warning.png"
-			})).show();
-		}
+		(new dialog.Confirm({
+		        "message"   : "Desea denegar la solicitud seleccionada?",
+		        "callback"  : function(e){
+	        					if (e) {
+									var focusedRow = tblSolicitud.getFocusedRow();
+									
+									tblSolicitud.blur();
+									
+									rowDataSolicitud.estado = "DA";
+									rowDataSolicitud.estado_descrip = mapEstado["DA"];
+									rowDataSolicitud.estado_condicion = 3;
+									
+									tableModelSolicitud.setRowsAsMapArray([rowDataSolicitud], focusedRow, true);
+									
+									var p = rowDataSolicitud;
+									
+									var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
+									rpc.mostrar = false;
+									rpc.addListener("completed", function(e){
+										var data = e.getData();
+										
+										//alert(qx.lang.Json.stringify(data, null, 2));
+										
+										tblSolicitud.focus();
+									});
+									rpc.addListener("failed", function(e){
+										var data = e.getData();
+										
+										if (data.message != "sesion_terminada") {
+											alert(qx.lang.Json.stringify(data, null, 2));
+										}
+									});
+									rpc.callAsyncListeners(true, "escribir_solicitud", p);
+	        					}
+		        			},
+		        "context"   : this,
+		        "image"     : "icon/48/status/dialog-warning.png"
+		})).show();
 	});
 	
 	
@@ -373,7 +352,7 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	
 	
 	var tableModelSolicitud = new qx.ui.table.model.Simple();
-	tableModelSolicitud.setColumns(["Paciente", "DNI", "Fecha", "Efector público", "Estado", "estado_condicion"], ["persona_nombre", "persona_dni", "f_emite", "efector_publico", "estado_descrip", "estado_condicion"]);
+	tableModelSolicitud.setColumns(["Paciente", "DNI", "Fecha", "Efector público", "Estado", "estado_condicion"], ["persona_nombre", "persona_dni", "fecha_emite", "efector_publico", "estado_descrip", "estado_condicion"]);
 	tableModelSolicitud.setColumnSortable(0, false);
 	tableModelSolicitud.setColumnSortable(1, false);
 	tableModelSolicitud.setColumnSortable(2, false);
@@ -437,9 +416,9 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 			controllerFormInfoEntsal.resetModel();
 			tableModelPrestacion.setDataAsMapArray([], true);
 			
-			btnAutorizar.setEnabled(rowDataSolicitud.estado == "E");
-			btnBloquear.setEnabled(rowDataSolicitud.estado == "B" || rowDataSolicitud.estado == "A");
-			btnBloquear.setLabel((rowDataSolicitud.estado == "B") ? "Desbloquear" : "Bloquear")
+			btnAutorizar.setEnabled(rowDataSolicitud.estado == "EH" || rowDataSolicitud.estado == "DA");
+			btnBloquear.setEnabled(rowDataSolicitud.estado == "EH" || rowDataSolicitud.estado == "AA");
+			//btnBloquear.setLabel((rowDataSolicitud.estado == "EH" || rowDataSolicitud.estado == "DA") ? "Autorizar" : "Denegar");
 			btnWebServices.setEnabled(true);
 			
 			menuSolicitud.memorizar([btnAutorizar, btnBloquear, btnWebServices]);
@@ -459,9 +438,9 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 			this.timerId = timer.start(function() {
 				
 				var p = {};
-				p.id_ta_solicitud = rowDataSolicitud.id_ta_solicitud;
+				p.id_m_solicitud = rowDataSolicitud.id_m_solicitud;
 				
-				this.rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.TA_Solicitudes");
+				this.rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
 				this.rpc.addListener("completed", function(e){
 					var data = e.getData();
 					
@@ -523,59 +502,12 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	aux.setBackgroundColor("#ffffc0");
 	formInfoEntsal.add(aux, "Observaciones", null, "observaciones");
 	
-	aux = new qx.ui.form.TextArea("");
-	aux.setReadOnly(true);
-	aux.setDecorator("main");
-	aux.setBackgroundColor("#ffffc0");
-	formInfoEntsal.add(aux, "Diagnostico CIE-10", null, "diagnostico");
-	
-	var aux = new qx.ui.form.TextArea("");
-	aux.setReadOnly(true);
-	aux.setDecorator("main");
-	aux.setBackgroundColor("#ffffc0");
-	formInfoEntsal.add(aux, "Examen complementario", null, "examen_complementario");
-	
-	var aux = new qx.ui.form.TextArea("");
-	aux.setReadOnly(true);
-	aux.setDecorator("main");
-	aux.setBackgroundColor("#ffffc0");
-	formInfoEntsal.add(aux, "Examen radiologico", null, "examen_radiologico");
-	
-	var aux = new qx.ui.form.TextArea("");
-	aux.setReadOnly(true);
-	aux.setDecorator("main");
-	aux.setBackgroundColor("#ffffc0");
-	formInfoEntsal.add(aux, "Examen otros", null, "examen_otros");
-	
-	var aux = new qx.ui.form.TextArea("");
-	aux.setReadOnly(true);
-	aux.setDecorator("main");
-	aux.setBackgroundColor("#ffffc0");
-	formInfoEntsal.add(aux, "Examen otro centro", null, "examen_otro_centro");
-	
 	var aux = new qx.ui.form.TextArea("");
 	aux.setReadOnly(true);
 	aux.setDecorator("main");
 	aux.setBackgroundColor("#ffffc0");
 	formInfoEntsal.add(aux, "Tratamiento realizado", null, "tratamiento_realizado");
 	
-	var aux = new qx.ui.form.TextArea("");
-	aux.setReadOnly(true);
-	aux.setDecorator("main");
-	aux.setBackgroundColor("#ffffc0");
-	formInfoEntsal.add(aux, "Fundamentacion", null, "fundamentacion");
-	
-	aux = new qx.ui.form.TextArea("");
-	aux.setReadOnly(true);
-	aux.setDecorator("main");
-	aux.setBackgroundColor("#ffffc0");
-	formInfoEntsal.add(aux, "Servicio", null, "internacion_servicio");
-	
-	aux = new qx.ui.form.TextArea("");
-	aux.setReadOnly(true);
-	aux.setDecorator("main");
-	aux.setBackgroundColor("#ffffc0");
-	formInfoEntsal.add(aux, "Cama", null, "internacion_cama");
 	
 	
 	var controllerFormInfoEntsal = new qx.data.controller.Form(null, formInfoEntsal);
@@ -597,7 +529,7 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	
 	
 	var tableModelPrestacion = new qx.ui.table.model.Simple();
-	tableModelPrestacion.setColumns(["Código", "Prestación", "Establecimiento", "F.turno", "Estudios", "Acompañantes", "Dias", "Monto"], ["codigo", "descrip", "ta_establecimiento_descrip", "f_turno", "estudios_a_realizar", "cant_acompanantes", "cant_dias", "monto_presup"]);
+	tableModelPrestacion.setColumns(["Código", "Descripción", "Precio", "Presentación", "Forma", "Dosis dia.", "Unidad", "Dur.trat.", "Cronico", "Cantidad", "Obs.pres.", "Obs.ent."], ["codigo_heredado", "descripcion", "precio", "presentacion", "forma_farmaceutica", "dosis_diaria", "unidades_descripcion", "duracion_tratamiento", "cronico", "cantidad_entregada", "observacion_prescripcion", "observacion_entrega"]);
 	tableModelPrestacion.addListener("dataChanged", function(e){
 		var rowCount = tableModelPrestacion.getRowCount();
 		
@@ -621,8 +553,11 @@ qx.Class.define("sacdiag.comp.pageTrasladoyAlojamiento",
 	//resizeBehaviorPrestacion.set(0, {width:"30%", minWidth:100});
 	//resizeBehaviorPrestacion.set(1, {width:"70%", minWidth:100});
 	//resizeBehaviorPrestacion.set(2, {width:"60%", minWidth:100});
-
 	
+	var cellrendererNumber = new qx.ui.table.cellrenderer.Number();
+	cellrendererNumber.setNumberFormat(application.numberformatMontoEs);
+	tableColumnModelPrestacion.setDataCellRenderer(2, cellrendererNumber);
+
 	
 	var selectionModelPrestacion = tblPrestacion.getSelectionModel();
 	selectionModelPrestacion.setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);
