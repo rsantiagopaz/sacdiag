@@ -96,10 +96,11 @@ class class_M_Solicitudes extends class_Base
 		
 		 
 		$row->precio = (float) $row->precio;
+		$row->cantidad_entregada = (float) $row->cantidad_entregada;
 		$row->dosis_diaria = (float) $row->dosis_diaria;
 		$row->duracion_tratamiento = (float) $row->duracion_tratamiento;
 		
-		$row->cantidad = $row->dosis_diaria * $row->duracion_tratamiento;
+		$row->cantidad_pedida = $row->dosis_diaria * $row->duracion_tratamiento;
 		
 		$row->estado_descrip = $estado[$row->estado];
 		

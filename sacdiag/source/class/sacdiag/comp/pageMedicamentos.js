@@ -714,7 +714,7 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	
 	
 	var tableModelPrestacion = new qx.ui.table.model.Simple();
-	tableModelPrestacion.setColumns(["Código", "Descripción", "Tipo", "Precio", "Presentación", "Forma", "Unidad", "Dosis dia.", "Dur.trat.", "Cantidad", "Estado", "estado_condicion"], ["codigo_heredado", "descripcion", "tipo_producto_descripcion", "precio", "presentacion", "forma_farmaceutica", "unidades_descripcion", "dosis_diaria", "duracion_tratamiento", "cantidad", "estado_descrip", "estado_condicion"]);
+	tableModelPrestacion.setColumns(["Código", "Descripción", "Tipo", "Precio", "Presentación", "Forma", "Unidad", "Dosis dia.", "Dur.trat.", "Cant.ped.", "Cant.ent.", "Estado", "estado_condicion"], ["codigo_heredado", "descripcion", "tipo_producto_descripcion", "precio", "presentacion", "forma_farmaceutica", "unidades_descripcion", "dosis_diaria", "duracion_tratamiento", "cantidad_pedida", "cantidad_entregada", "estado_descrip", "estado_condicion"]);
 	tableModelPrestacion.addListener("dataChanged", function(e){
 		var rowCount = tableModelPrestacion.getRowCount();
 		
@@ -733,7 +733,7 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	tblPrestacion.setContextMenu(menuPrestacion);
 	
 	var tableColumnModelPrestacion = tblPrestacion.getTableColumnModel();
-	tableColumnModelPrestacion.setColumnVisible(11, false);
+	tableColumnModelPrestacion.setColumnVisible(12, false);
 	
 	var resizeBehaviorPrestacion = tableColumnModelPrestacion.getBehavior();
 
@@ -751,7 +751,7 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	cellrendererString.addNumericCondition("==", 2, null, "#119900", null, null, "estado_condicion");
 	cellrendererString.addNumericCondition("==", 3, null, "#FF0000", null, null, "estado_condicion");
 	cellrendererString.addNumericCondition("==", 4, null, "#0000FF", null, null, "estado_condicion");
-	tableColumnModelPrestacion.setDataCellRenderer(10, cellrendererString);
+	tableColumnModelPrestacion.setDataCellRenderer(11, cellrendererString);
 
 	
 	var selectionModelPrestacion = tblPrestacion.getSelectionModel();
