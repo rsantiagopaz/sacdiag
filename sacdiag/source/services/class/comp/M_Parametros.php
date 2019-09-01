@@ -113,6 +113,15 @@ class class_M_Parametros extends class_Base
 
 	return $this->toJson($sql, $opciones);
   }
+  
+  
+  public function method_autocompletarTipoProducto($params, $error) {
+  	$p = $params[0];
+  	
+	$sql = "SELECT id_m_tipo_producto AS model, descripcion AS label FROM m_tipo_producto WHERE descripcion LIKE'%". $p->texto . "%' ORDER BY label";
+
+	return $this->toJson($sql);
+  }
  
   
   

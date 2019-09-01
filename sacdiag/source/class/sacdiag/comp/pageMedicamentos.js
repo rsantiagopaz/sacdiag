@@ -18,6 +18,8 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	var application = qx.core.Init.getApplication();
 	
 	var rowDataSolicitud;
+	var rowDataPrestacion;
+	
 	var mapEstado = {
 		"EH" : "Emitida Hospital",
 		"AS" : "Autorizada Ser.Soc.Min.",
@@ -35,6 +37,9 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	var functionActualizarSolicitud = function(id_m_solicitud) {
 		
 		tblSolicitud.setFocusedCell();
+		tblPrestacion.setFocusedCell();
+		
+		tableModelSolicitud.setDataAsMapArray([], true);
 		tableModelPrestacion.setDataAsMapArray([], true);
 		
 		btnAutorizar.setEnabled(false);
@@ -43,6 +48,7 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 		menuSolicitud.memorizar([btnAutorizar, btnBloquear, btnWebServices]);
 		
 		controllerFormInfoEntsal.resetModel();
+		controllerFormInfoEntsal2.resetModel();
 		
 		
 		
@@ -63,7 +69,8 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 			p.desde = dtfDesde.getValue();
 			p.hasta = dtfHasta.getValue();
 			if (! lstPaciente.isSelectionEmpty()) p.persona_id_paciente = lstPaciente.getSelection()[0].getModel();
-			//if (! lstEPublico.isSelectionEmpty()) p.id_efector_publico = lstEPublico.getSelection()[0].getModel();
+			p.id_m_tipo_producto = slbTipoProducto.getSelection()[0].getModel();
+			if (! lstVademecum.isSelectionEmpty()) p.id_m_vademecum = lstVademecum.getSelection()[0].getModel();
 			if (! lstPersonal.isSelectionEmpty()) p.id_personal_medico = lstPersonal.getSelection()[0].getModel();
 			p.estado = slbEstado.getSelection()[0].getModel();
 			
@@ -153,7 +160,26 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	//form.add(cboEPublico, "Ef.público", null, "id_efector_publico", null, {grupo: 1, item: {row: 3, column: 1, colSpan: 4}});
 	
 	
+	var slbTipoProducto = new qx.ui.form.SelectBox();
 	
+	var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Parametros");
+	try {
+		var resultado = rpc.callSync("autocompletarTipoProducto", {texto: ""});
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
+	
+	slbTipoProducto.add(new qx.ui.form.ListItem("-", null, ""));
+	for (var x in resultado) {
+		slbTipoProducto.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
+	}
+	
+	form.add(slbTipoProducto, "Tipo prod.", null, "id_m_tipo_producto", null, {grupo: 1, item: {row: 3, column: 1, colSpan: 4}});
+	
+	
+	var cboVademecum = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.M_Parametros", methodName: "autocompletarVademecum"});
+	var lstVademecum = cboVademecum.getChildControl("list");
+	form.add(cboVademecum, "Vademecum", null, "id_m_vademecum", null, {grupo: 1, item: {row: 4, column: 1, colSpan: 4}});
 	
 	
 	
@@ -168,7 +194,7 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 		var data = e.getData();
 		
 	});
-	form.add(cboPersonal, "Médico", null, "id_personal", null, {grupo: 1, item: {row: 4, column: 1, colSpan: 4}});
+	form.add(cboPersonal, "Médico", null, "id_personal", null, {grupo: 1, item: {row: 5, column: 1, colSpan: 4}});
 	
 	
 	
@@ -186,7 +212,7 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	
 	
 	
-	form.add(slbEstado, "Estado", null, "estado", null, {grupo: 1, item: {row: 5, column: 1, colSpan: 2}});
+	form.add(slbEstado, "Estado", null, "estado", null, {grupo: 1, item: {row: 6, column: 1, colSpan: 2}});
 	
 	
 	
@@ -210,7 +236,7 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 		
 		dtfDesde.focus();
 	})
-	form.addButton(btnInicializar, {grupo: 1, item: {row: 6, column: 2}});
+	form.addButton(btnInicializar, {grupo: 1, item: {row: 7, column: 2}});
 	
 
 	
@@ -218,7 +244,7 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	btnFiltrar.addListener("execute", function(e){
 		functionActualizarSolicitud();
 	})
-	form.addButton(btnFiltrar, {grupo: 1, item: {row: 6, column: 3}});
+	form.addButton(btnFiltrar, {grupo: 1, item: {row: 7, column: 3}});
 	
 	
 	
@@ -240,87 +266,163 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	var btnAutorizar = new qx.ui.menu.Button("Autorizar...");
 	btnAutorizar.setEnabled(false);
 	btnAutorizar.addListener("execute", function(e){
-		(new dialog.Confirm({
-		        "message"   : "Desea autorizar la solicitud seleccionada?",
-		        "callback"  : function(e){
-	        					if (e) {
-									var focusedRow = tblSolicitud.getFocusedRow();
-									
-									tblSolicitud.blur();
-									
-									rowDataSolicitud.estado = "AA";
-									rowDataSolicitud.estado_descrip = mapEstado["AA"];
-									rowDataSolicitud.estado_condicion = 2;
-									
-									tableModelSolicitud.setRowsAsMapArray([rowDataSolicitud], focusedRow, true);
-									
-									var p = rowDataSolicitud;
-									
-									var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
-									rpc.mostrar = false;
-									rpc.addListener("completed", function(e){
-										var data = e.getData();
-										
-										//alert(qx.lang.Json.stringify(data, null, 2));
-										
-										tblSolicitud.focus();
-									});
-									rpc.addListener("failed", function(e){
-										var data = e.getData();
-										
-										if (data.message != "sesion_terminada") {
-											alert(qx.lang.Json.stringify(data, null, 2));
-										}
-									});
-									rpc.callAsyncListeners(true, "escribir_solicitud", p);
-	        					}
-		        			},
-		        "context"   : this,
-		        "image"     : "icon/48/status/dialog-warning.png"
-		})).show();
+		btnFiltrar.focus();
+		
+		window.setTimeout(function(){
+			(new dialog.Confirm({
+			        "message"   : "Desea autorizar la solicitud seleccionada?",
+			        "callback"  : function(e){
+		        					if (e) {
+		        						window.setTimeout(function(){
+			        						var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
+			
+			        						var data = tableModelPrestacion.getDataAsMapArray();
+			        						
+											for (var x in data) {
+												var p = {};
+												p.id_m_solicitud_item = data[x].id_m_solicitud_item;
+												p.estado = "PE";
+												
+												try {
+													var resultado = rpc.callSync("escribir_prestacion", p);
+												} catch (ex) {
+													alert("Sync exception: " + ex);
+												}
+											}
+			        						
+											var p = {};
+											p.id_m_solicitud = rowDataSolicitud.id_m_solicitud;
+											p.observaciones_bloqueo = "";
+											p.estado = "AA";
+											
+											//var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
+											rpc.mostrar = false;
+											rpc.addListener("completed", function(e){
+												var data = e.getData();
+												
+												//alert(qx.lang.Json.stringify(data, null, 2));
+												
+												functionActualizarSolicitud(rowDataSolicitud.id_m_solicitud);
+												
+											});
+			
+											rpc.callAsyncListeners(true, "escribir_solicitud", p);
+										}, 1);
+		        					}
+			        			},
+			        "context"   : this,
+			        "image"     : "icon/48/status/dialog-warning.png"
+			})).show();
+		}, 1);
 	});
 	
 	var btnBloquear = new qx.ui.menu.Button("Denegar...");
 	btnBloquear.setEnabled(false);
 	btnBloquear.addListener("execute", function(e){
-		(new dialog.Confirm({
-		        "message"   : "Desea denegar la solicitud seleccionada?",
-		        "callback"  : function(e){
-	        					if (e) {
-									var focusedRow = tblSolicitud.getFocusedRow();
-									
-									tblSolicitud.blur();
-									
-									rowDataSolicitud.estado = "DA";
-									rowDataSolicitud.estado_descrip = mapEstado["DA"];
-									rowDataSolicitud.estado_condicion = 3;
-									
-									tableModelSolicitud.setRowsAsMapArray([rowDataSolicitud], focusedRow, true);
-									
-									var p = rowDataSolicitud;
-									
-									var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
-									rpc.mostrar = false;
-									rpc.addListener("completed", function(e){
-										var data = e.getData();
-										
-										//alert(qx.lang.Json.stringify(data, null, 2));
-										
-										tblSolicitud.focus();
-									});
-									rpc.addListener("failed", function(e){
-										var data = e.getData();
-										
-										if (data.message != "sesion_terminada") {
-											alert(qx.lang.Json.stringify(data, null, 2));
-										}
-									});
-									rpc.callAsyncListeners(true, "escribir_solicitud", p);
-	        					}
-		        			},
-		        "context"   : this,
-		        "image"     : "icon/48/status/dialog-warning.png"
-		})).show();
+		btnFiltrar.focus();
+		
+		/*
+		window.setTimeout(function(){
+			(new dialog.Confirm({
+			        "message"   : "Desea denegar la solicitud seleccionada?",
+			        "callback"  : function(e){
+		        					if (e) {
+		        						window.setTimeout(function(){
+			        						var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
+		
+			        						var data = tableModelPrestacion.getDataAsMapArray();
+			        						
+											for (var x in data) {
+												var p = {};
+												p.id_m_solicitud_item = data[x].id_m_solicitud_item;
+												p.estado = "DA";
+												
+												try {
+													var resultado = rpc.callSync("escribir_prestacion", p);
+												} catch (ex) {
+													alert("Sync exception: " + ex);
+												}
+											}
+			        						
+											var p = {};
+											p.id_m_solicitud = rowDataSolicitud.id_m_solicitud;
+											p.estado = "DA";
+											
+											//var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
+											rpc.mostrar = false;
+											rpc.addListener("completed", function(e){
+												var data = e.getData();
+												
+												//alert(qx.lang.Json.stringify(data, null, 2));
+												
+												functionActualizarSolicitud(rowDataSolicitud.id_m_solicitud);
+												
+											});
+		
+											rpc.callAsyncListeners(true, "escribir_solicitud", p);
+										}, 1);
+		        					}
+			        			},
+			        "context"   : this,
+			        "image"     : "icon/48/status/dialog-warning.png"
+			})).show();
+		}, 1);
+		*/
+		
+		
+		
+		
+		
+		window.setTimeout(function(){
+			var win = new sacdiag.comp.windowObservar();
+			win.setCaption("Denegar solicitud");
+			win.setModal(true);
+			win.addListener("aceptado", function(e){
+				var data = e.getData();
+				
+				window.setTimeout(function(){
+					var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
+	
+					var dataAsMap = tableModelPrestacion.getDataAsMapArray();
+					
+					for (var x in dataAsMap) {
+						var p = {};
+						p.id_m_solicitud_item = dataAsMap[x].id_m_solicitud_item;
+						p.estado = "DA";
+						
+						try {
+							var resultado = rpc.callSync("escribir_prestacion", p);
+						} catch (ex) {
+							alert("Sync exception: " + ex);
+						}
+					}
+					
+					
+					var p = {};
+					p.id_m_solicitud = rowDataSolicitud.id_m_solicitud;
+					p.observaciones_bloqueo = data;
+					p.estado = "DA";
+					
+					var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
+					rpc.mostrar = false;
+					rpc.addListener("completed", function(e){
+						var data = e.getData();
+						
+						//alert(qx.lang.Json.stringify(data, null, 2));
+						
+						functionActualizarSolicitud(rowDataSolicitud.id_m_solicitud);
+						
+					});
+	
+					rpc.callAsyncListeners(true, "escribir_solicitud", p);
+				}, 1);
+			});
+			
+			application.getRoot().add(win);
+			win.center();
+			win.open();
+		
+		}, 1);
 	});
 	
 	
@@ -413,8 +515,12 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 			
 			rowDataSolicitud = tableModelSolicitud.getRowDataAsMap(tblSolicitud.getFocusedRow());
 			
-			controllerFormInfoEntsal.resetModel();
+			tblPrestacion.setFocusedCell();
+			
 			tableModelPrestacion.setDataAsMapArray([], true);
+			
+			controllerFormInfoEntsal.resetModel();
+			controllerFormInfoEntsal2.resetModel();
 			
 			btnAutorizar.setEnabled(rowDataSolicitud.estado == "EH" || rowDataSolicitud.estado == "DA");
 			btnBloquear.setEnabled(rowDataSolicitud.estado == "EH" || rowDataSolicitud.estado == "AA");
@@ -422,6 +528,11 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 			btnWebServices.setEnabled(true);
 			
 			menuSolicitud.memorizar([btnAutorizar, btnBloquear, btnWebServices]);
+			
+			
+			btnBloquearPrestacion.setEnabled(false);
+			
+			menuPrestacion.memorizar([btnBloquearPrestacion]);
 			
 			
 			var timer = qx.util.TimerManager.getInstance();
@@ -457,14 +568,15 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 		}
 	});
 
-	this.add(tblSolicitud, {left: "25%", top: 0, right: 0, bottom: "50%"});
+	this.add(tblSolicitud, {left: "25%", top: 0, right: 0, bottom: "34%"});
 	
 	
+	var container = new qx.ui.container.Composite(new qx.ui.layout.Canvas());
+	this.add(container, {left: 0, top: 280, right: "76%", bottom: 0});
 	
-	
-	var gbxOtros = new qx.ui.groupbox.GroupBox("Otros datos");
+	var gbxOtros = new qx.ui.groupbox.GroupBox("Otros datos solicitud");
 	gbxOtros.setLayout(new qx.ui.layout.Grow());
-	this.add(gbxOtros, {left: 0, top: "50%", right: "76%", bottom: 0});
+	container.add(gbxOtros, {left: 0, top: 0, right: 0, bottom: "50%"});
 	
 	var containerScroll = new qx.ui.container.Scroll();
 	gbxOtros.add(containerScroll);
@@ -525,11 +637,84 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	
 	
 	
+	
+	// Menu
+	
+	var btnBloquearPrestacion = new qx.ui.menu.Button("Denegar...");
+	btnBloquearPrestacion.setEnabled(false);
+	btnBloquearPrestacion.addListener("execute", function(e){
+		tblSolicitud.blur();
+		
+		if (rowDataSolicitud.estado == "AA" && rowDataPrestacion.estado == "PE") {
+			
+			(new dialog.Confirm({
+			        "message"   : "Desea denegar item seleccionado?",
+			        "callback"  : function(e){
+		        					if (e) {
+		        						
+										var p = {};
+										p.id_m_solicitud_item = rowDataPrestacion.id_m_solicitud_item;
+										p.estado = "DA";
+										
+										var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
+										rpc.mostrar = false;
+										rpc.addListener("completed", function(e){
+											var data = e.getData();
+											
+											tblSolicitud.focus();
+											
+										});
+
+										rpc.callAsyncListeners(true, "escribir_prestacion", p);
+		        					}
+			        			},
+			        "context"   : this,
+			        "image"     : "icon/48/status/dialog-warning.png"
+			})).show();
+		} else if (rowDataSolicitud.estado == "AA" && rowDataPrestacion.estado == "DA") {
+			
+			(new dialog.Confirm({
+			        "message"   : "Desea autorizar item seleccionado?",
+			        "callback"  : function(e){
+		        					if (e) {
+		        						
+										var p = {};
+										p.id_m_solicitud_item = rowDataPrestacion.id_m_solicitud_item;
+										p.estado = "PE";
+										
+										var rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.M_Solicitudes");
+										rpc.mostrar = false;
+										rpc.addListener("completed", function(e){
+											var data = e.getData();
+											
+											tblSolicitud.focus();
+											
+										});
+
+										rpc.callAsyncListeners(true, "escribir_prestacion", p);
+		        					}
+			        			},
+			        "context"   : this,
+			        "image"     : "icon/48/status/dialog-warning.png"
+			})).show();
+		}
+	});
+	
+	
+	var menuPrestacion = new componente.comp.ui.ramon.menu.Menu();
+	
+	menuPrestacion.add(btnBloquearPrestacion);
+	menuPrestacion.memorizar();	
+	
+	
+	
+	
+	
 	//Tabla
 	
 	
 	var tableModelPrestacion = new qx.ui.table.model.Simple();
-	tableModelPrestacion.setColumns(["Código", "Descripción", "Precio", "Presentación", "Forma", "Dosis dia.", "Unidad", "Dur.trat.", "Cronico", "Cantidad", "Obs.pres.", "Obs.ent."], ["codigo_heredado", "descripcion", "precio", "presentacion", "forma_farmaceutica", "dosis_diaria", "unidades_descripcion", "duracion_tratamiento", "cronico", "cantidad_entregada", "observacion_prescripcion", "observacion_entrega"]);
+	tableModelPrestacion.setColumns(["Código", "Descripción", "Tipo", "Precio", "Presentación", "Forma", "Unidad", "Dosis dia.", "Dur.trat.", "Cantidad", "Estado", "estado_condicion"], ["codigo_heredado", "descripcion", "tipo_producto_descripcion", "precio", "presentacion", "forma_farmaceutica", "unidades_descripcion", "dosis_diaria", "duracion_tratamiento", "cantidad", "estado_descrip", "estado_condicion"]);
 	tableModelPrestacion.addListener("dataChanged", function(e){
 		var rowCount = tableModelPrestacion.getRowCount();
 		
@@ -545,8 +730,10 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	tblPrestacion.toggleColumnVisibilityButtonVisible();
 	//tbl.setRowHeight(45);
 	//tblPrestacion.setContextMenu(menuPrestacion);
+	tblPrestacion.setContextMenu(menuPrestacion);
 	
 	var tableColumnModelPrestacion = tblPrestacion.getTableColumnModel();
+	tableColumnModelPrestacion.setColumnVisible(11, false);
 	
 	var resizeBehaviorPrestacion = tableColumnModelPrestacion.getBehavior();
 
@@ -556,19 +743,76 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	
 	var cellrendererNumber = new qx.ui.table.cellrenderer.Number();
 	cellrendererNumber.setNumberFormat(application.numberformatMontoEs);
-	tableColumnModelPrestacion.setDataCellRenderer(2, cellrendererNumber);
+	tableColumnModelPrestacion.setDataCellRenderer(3, cellrendererNumber);
+	
+	
+	var cellrendererString = new qx.ui.table.cellrenderer.String();
+	cellrendererString.addNumericCondition("==", 1, null, "#FF8000", null, null, "estado_condicion");
+	cellrendererString.addNumericCondition("==", 2, null, "#119900", null, null, "estado_condicion");
+	cellrendererString.addNumericCondition("==", 3, null, "#FF0000", null, null, "estado_condicion");
+	cellrendererString.addNumericCondition("==", 4, null, "#0000FF", null, null, "estado_condicion");
+	tableColumnModelPrestacion.setDataCellRenderer(10, cellrendererString);
 
 	
 	var selectionModelPrestacion = tblPrestacion.getSelectionModel();
 	selectionModelPrestacion.setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);
 	selectionModelPrestacion.addListener("changeSelection", function(e){
+		if (selectionModelPrestacion.isSelectionEmpty()) {
 
+		} else {
+
+			rowDataPrestacion = tableModelPrestacion.getRowDataAsMap(tblPrestacion.getFocusedRow());
+
+			controllerFormInfoEntsal2.setModel(qx.data.marshal.Json.createModel(rowDataPrestacion));
+
+			btnBloquearPrestacion.setEnabled(rowDataSolicitud.estado == "AA" && (rowDataPrestacion.estado == "PE" || rowDataPrestacion.estado == "DA"));
+			btnBloquearPrestacion.setLabel((rowDataPrestacion.estado == "PE") ? "Denegar..." : "Autorizar...");
+
+			menuPrestacion.memorizar([btnBloquearPrestacion]);
+		}
 	});
 
-	this.add(tblPrestacion, {left: "25%", top: "52%", right: 0, bottom: 0});
+	this.add(tblPrestacion, {left: "25%", top: "67%", right: 0, bottom: 0});
 
 	
 	
+	
+	
+	var gbxOtros2 = new qx.ui.groupbox.GroupBox("Otros datos medicamento");
+	gbxOtros2.setLayout(new qx.ui.layout.Grow());
+	container.add(gbxOtros2, {left: 0, top: "50%", right: 0, bottom: 0});
+	
+	var containerScroll2 = new qx.ui.container.Scroll();
+	gbxOtros2.add(containerScroll2);
+	
+	
+	var formInfoEntsal2 = new qx.ui.form.Form();
+	
+	var aux = new qx.ui.form.TextArea("");
+	aux.setReadOnly(true);
+	aux.setDecorator("main");
+	aux.setBackgroundColor("#ffffc0");
+	formInfoEntsal2.add(aux, "Obs.pres.", null, "observacion_prescripcion");
+	
+	var aux = new qx.ui.form.TextArea("");
+	aux.setReadOnly(true);
+	aux.setDecorator("main");
+	aux.setBackgroundColor("#ffffc0");
+	formInfoEntsal2.add(aux, "Obs.ent.", null, "observacion_entrega");
+	
+	var aux = new qx.ui.form.TextField("");
+	aux.setReadOnly(true);
+	aux.setDecorator("main");
+	aux.setBackgroundColor("#ffffc0");
+	formInfoEntsal2.add(aux, "Crónico", null, "cronico");
+
+	
+	var controllerFormInfoEntsal2 = new qx.data.controller.Form(null, formInfoEntsal2);
+	//modelForm = controllerFormInfoVehiculo.createModel(true);
+	
+	var formViewEntsal2 = new qx.ui.form.renderer.Single(formInfoEntsal2);
+
+	containerScroll2.add(formViewEntsal2);
 	
 	
 	
