@@ -1,7 +1,7 @@
 qx.Class.define("farmacia.comp.windowEntregar",
 {
 	extend : componente.comp.ui.ramon.window.Window,
-	construct : function ()
+	construct : function (cantidad_maxima)
 	{
 	this.base(arguments);
 	
@@ -28,9 +28,11 @@ qx.Class.define("farmacia.comp.windowEntregar",
 	var form = new qx.ui.form.Form();
 	
 	
-	var txtCantidad = new qx.ui.form.Spinner(1, 1, 100000);
+	var txtCantidad = new qx.ui.form.Spinner(0, 1, cantidad_maxima);
 	txtCantidad.setRequired(true);
-	form.add(txtCantidad, "Cantidad", null, "cantidad");
+	form.add(txtCantidad, "Cantidad", function(value) {
+		if (txtCantidad.getValue() <= 0) throw new qx.core.ValidationError("Validation Error", "Debe ingresar cantidad");
+	}, "cantidad");
 	
 	
 	

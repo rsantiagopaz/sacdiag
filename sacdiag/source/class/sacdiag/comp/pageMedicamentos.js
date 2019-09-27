@@ -426,6 +426,12 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	});
 	
 	
+	var btnImprimir = new qx.ui.menu.Button("Imprimir...");
+	btnImprimir.addListener("execute", function(e){
+		window.open("services/class/comp/pablo/imprimir_constancia.php?rutina=hoja_cargo&id_solicitud=" + rowDataSolicitud.id_m_solicitud);
+	});
+	
+	
 	var btnWebServices = new qx.ui.menu.Button("consultar Web services...");
 	btnWebServices.setEnabled(false);
 	btnWebServices.addListener("execute", function(e){
@@ -441,6 +447,7 @@ qx.Class.define("sacdiag.comp.pageMedicamentos",
 	
 	menuSolicitud.add(btnAutorizar);
 	menuSolicitud.add(btnBloquear);
+	menuSolicitud.add(btnImprimir);
 	menuSolicitud.addSeparator();
 	menuSolicitud.add(btnWebServices);
 	menuSolicitud.memorizar();

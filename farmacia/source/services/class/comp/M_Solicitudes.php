@@ -178,6 +178,9 @@ class class_M_Solicitudes extends class_Base
 	$sql = "UPDATE m_solicitudes SET estado='EF' WHERE id_m_solicitud=" . $p->id_m_solicitud;
 	$this->mysqli->query($sql);
 	
+	$sql = "INSERT m_entregas SET id_m_solicitud_item=" . $p->id_m_solicitud_item . ", cantidad=" . $p->cantidad . ", fecha=NOW(), id_usuario=" . $_SESSION['login']->id_oas_usuario;
+	$this->mysqli->query($sql);
+	
 	$this->mysqli->query("COMMIT");
   }
 }

@@ -532,7 +532,7 @@ qx.Class.define("farmacia.comp.pageMedicamentos",
 	var btnEntregar = new qx.ui.menu.Button("Entregar...");
 	btnEntregar.setEnabled(false);
 	btnEntregar.addListener("execute", function(e){
-		var win = new farmacia.comp.windowEntregar();
+		var win = new farmacia.comp.windowEntregar(rowDataPrestacion.cantidad_pedida - rowDataPrestacion.cantidad_entregada);
 		win.setCaption("Entregar item");
 		win.setModal(true);
 		win.addListener("aceptado", function(e){
