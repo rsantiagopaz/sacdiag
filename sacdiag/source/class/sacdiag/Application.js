@@ -178,6 +178,20 @@ qx.Class.define("sacdiag.Application",
 	mnuEdicion.add(btnPanelDeEstudiosEnProceso);
 	
 	
+	var btnPanelDePLH = new qx.ui.menu.Button("Panel de Pañal y Leche...");
+	btnPanelDePLH.addListener("execute", function(){
+		if (pageMain["pagePanelDePLH"] == null) {
+			pageMain["pagePanelDePLH"] = new sacdiag.comp.pagePanelDePLH();
+			pageMain["pagePanelDePLH"].addListenerOnce("close", function(e){
+				pageMain["pagePanelDePLH"] = null;
+			});
+			tabviewMain.add(pageMain["pagePanelDePLH"]);
+		}
+		tabviewMain.setSelection([pageMain["pagePanelDePLH"]]);
+	});
+	mnuEdicion.add(btnPanelDePLH);
+	
+	
 	var btnControlDePrefacturaciones = new qx.ui.menu.Button("Control de Prefacturaciones...");
 	btnControlDePrefacturaciones.addListener("execute", function(){
 		if (pageMain["pageControlDePrefacturaciones"] == null) {

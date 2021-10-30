@@ -47,9 +47,9 @@ class class_Parametros extends class_Base
 		
 		$sig_semanal = "NULL";
 		
-		if ($p->model->cronograma_semanal) {
+		if (false && $p->model->cronograma_semanal) {
 			
-			$sig_semanal = $this->method_calcular_turno_semanal($params, $error);
+			$sig_semanal = $this->calcular_turno_semanal($p->prestador_tipo);
 			$sig_semanal = "'" . $sig_semanal->organismo_area_id . "'";
 			
 			
@@ -71,9 +71,9 @@ class class_Parametros extends class_Base
 		
 		$sig_mensual = "NULL";
 		
-		if ($p->model->cronograma_mensual) {
+		if (false && $p->model->cronograma_mensual) {
 			
-			$sig_mensual = $this->method_calcular_turno_mensual($params, $error);
+			$sig_mensual = $this->calcular_turno_mensual($p->prestador_tipo);
 			$sig_mensual = "'" . $sig_mensual->organismo_area_id . "'";
 			
 			
@@ -97,7 +97,7 @@ class class_Parametros extends class_Base
 		$sql = "INSERT _organismos_areas SET organismo_area='" . $p->model->nombre . "', organismo_area_id='" . $organismo_area_id . "', organismo_area_estado='3', organismo_area_tipo_id='E', organismo_id='PP', publico='N'";
 		$this->mysqli->query($sql);
 		
-		
+		$p->model->prestador_tipo = $p->prestador_tipo;
 		$set = $this->prepararCampos($p->model, "prestadores_fantasia");
 		
 		$sql = "INSERT prestadores_fantasia SET " . $set . ", fecha_alta=NOW(), sig_semanal=" . $sig_semanal . ", sig_mensual=" . $sig_mensual;
@@ -126,8 +126,21 @@ class class_Parametros extends class_Base
   }
   
   
-  
   public function method_calcular_turno_semanal($params, $error) {
+  	$p = $params[0];
+  	
+  	return $this->calcular_turno_semanal($p->prestador_tipo);
+  }
+  
+  public function method_calcular_turno_mensual($params, $error) {
+  	$p = $params[0];
+  	
+  	return $this->calcular_turno_mensual($p->prestador_tipo);
+  }
+  
+  
+  public function calcular_turno_semanal($prestador_tipo) {
+  	
   	$fecha = date("Y-m-d");
   	
 	$row = null;
@@ -135,8 +148,43 @@ class class_Parametros extends class_Base
 	$periodo_descrip = null;
 		
 	do {
-		$sql = "SELECT * FROM cronograma_semanal";
+		if ($prestador_tipo == 'acd') {
+			$sql = "SELECT * FROM cronograma_semanal";
+		} else if ($prestador_tipo == 'pl') {
+			$sql = "SELECT * FROM plh_cronograma_semanal";
+		}
+		
 		$rs = $this->mysqli->query($sql);
+		
+		if ($rs->num_rows == 0) {
+		  	$sql = "SELECT organismo_area_id, fecha_alta";
+		  	$sql.= " FROM prestadores_fantasia";
+		  	$sql.= " WHERE cronograma_semanal AND prestador_tipo = '" . $prestador_tipo . "'";
+		  	$sql.= " ORDER BY fecha_alta";
+		  	
+		  	$rs = $this->mysqli->query($sql);
+		  	
+		  	if ($rs->num_rows > 0) {
+		  		$row = $rs->fetch_object();
+		  		
+				$datetime = new DateTime($row->fecha_alta);
+				$datetime = $datetime->add(new DateInterval("P1W"));
+				$fecha_hasta = $datetime->format("Y-m-d");
+		 
+		 		if ($prestador_tipo == 'acd') {
+					$sql = "INSERT cronograma_semanal";
+				} else if ($prestador_tipo == 'pl') {
+					$sql = "INSERT plh_cronograma_semanal";
+				}
+				
+				$sql.= " SET id_prestador_fantasia='" . $row->organismo_area_id . "', fecha_desde='" . $row->fecha_alta . "', fecha_hasta='" . $fecha_hasta . "'";
+				
+				$this->mysqli->query($sql);
+				
+				continue;
+		  	}
+		}
+			
 		for ($i = 1; $i <= $rs->num_rows; $i++) {
 			$row = $rs->fetch_object();
 			if ($fecha >= $row->fecha_desde && $fecha <= $row->fecha_hasta) {
@@ -144,7 +192,6 @@ class class_Parametros extends class_Base
 				$periodo_descrip = $row->fecha_desde . " - " . $row->fecha_hasta;
 				break;
 			}
-			
 		}
 
 		if (($sig_semanal == "NULL")) {
@@ -180,7 +227,12 @@ class class_Parametros extends class_Base
 			} while ($bandera);
 			
 			
-			$sql = "INSERT cronograma_semanal SET id_prestador_fantasia='" . $rowPD->sig_semanal . "', fecha_desde='" . $fecha_desde . "', fecha_hasta='" . $fecha_hasta . "'";
+			if ($prestador_tipo == 'acd') {
+				$sql = "INSERT cronograma_semanal SET id_prestador_fantasia='" . $rowPD->sig_semanal . "', fecha_desde='" . $fecha_desde . "', fecha_hasta='" . $fecha_hasta . "'";
+			} else if ($prestador_tipo == 'pl') {
+				$sql = "INSERT plh_cronograma_semanal SET id_prestador_fantasia='" . $rowPD->sig_semanal . "', fecha_desde='" . $fecha_desde . "', fecha_hasta='" . $fecha_hasta . "'";
+			}
+			
 			$this->mysqli->query($sql);
 		}
 		
@@ -196,7 +248,8 @@ class class_Parametros extends class_Base
   }
   
   
-  public function method_calcular_turno_mensual($params, $error) {
+  public function calcular_turno_mensual($prestador_tipo) {
+ 	
   	$fecha = date("Y-m-d");
   	
 	$row = null;
@@ -218,8 +271,42 @@ class class_Parametros extends class_Base
 	$meses[12] = "Diciembre";
 		
 	do {
-		$sql = "SELECT * FROM cronograma_mensual";
+		if ($prestador_tipo == 'acd') {
+			$sql = "SELECT * FROM cronograma_mensual";
+		} else if ($prestador_tipo == 'pl') {
+			$sql = "SELECT * FROM plh_cronograma_mensual";
+		}
+		
 		$rs = $this->mysqli->query($sql);
+		
+		if ($rs->num_rows == 0) {
+		  	$sql = "SELECT organismo_area_id, fecha_alta";
+		  	$sql.= " FROM prestadores_fantasia";
+		  	$sql.= " WHERE cronograma_mensual AND prestador_tipo = '" . $prestador_tipo . "'";
+		  	$sql.= " ORDER BY fecha_alta";
+		  	
+		  	$rs = $this->mysqli->query($sql);
+		  	
+		  	if ($rs->num_rows > 0) {
+		  		$row = $rs->fetch_object();
+		  		
+				$datetime = new DateTime($row->fecha_alta);
+				$fecha = $datetime->format("Y-m-01");
+		 
+		 		if ($prestador_tipo == 'acd') {
+					$sql = "INSERT cronograma_mensual";
+				} else if ($prestador_tipo == 'pl') {
+					$sql = "INSERT plh_cronograma_mensual";
+				}
+				
+				$sql.= " SET id_prestador_fantasia='" . $row->organismo_area_id . "', fecha='" . $fecha . "'";
+				
+				$this->mysqli->query($sql);
+				
+				continue;
+		  	}
+		}
+		
 		for ($i = 1; $i <= $rs->num_rows; $i++) {
 			$row = $rs->fetch_object();
 			
@@ -256,8 +343,12 @@ class class_Parametros extends class_Base
 			
 			} while ($bandera);
 			
+			if ($prestador_tipo == 'acd') {
+				$sql = "INSERT cronograma_mensual SET id_prestador_fantasia='" . $rowPD->sig_mensual . "', fecha='" . $fecha_desde . "'";
+			} else if ($prestador_tipo == 'pl') {
+				$sql = "INSERT plh_cronograma_mensual SET id_prestador_fantasia='" . $rowPD->sig_mensual . "', fecha='" . $fecha_desde . "'";
+			}
 			
-			$sql = "INSERT cronograma_mensual SET id_prestador_fantasia='" . $rowPD->sig_mensual . "', fecha='" . $fecha_desde . "'";
 			$this->mysqli->query($sql);
 		}
 		
@@ -483,7 +574,14 @@ class class_Parametros extends class_Base
   	$resultado = array();
 
   	
-  	$sql = "SELECT organismo_area_id AS model, organismo_area AS label, organismo_area AS denominacion, prestadores_fantasia.* FROM _organismos_areas LEFT JOIN prestadores_fantasia USING(organismo_area_id) WHERE organismo_area_estado='3' AND organismo_area LIKE '%". $p->texto . "%' ORDER BY organismo_area";
+  	$sql = "SELECT organismo_area_id AS model, organismo_area AS label, organismo_area AS denominacion, prestadores_fantasia.*";
+  	$sql.= " FROM _organismos_areas INNER JOIN prestadores_fantasia USING(organismo_area_id)";
+  	$sql.= " WHERE organismo_area_estado='3' AND organismo_area LIKE '%". $p->texto . "%'";
+  	if ($p->prestador_tipo) {
+  		$sql.= " AND prestadores_fantasia.prestador_tipo = '" . $p->prestador_tipo . "'";
+  	}
+  	$sql.= " ORDER BY organismo_area";
+  	
 	$rs = $this->mysqli->query($sql);
 	while ($row = $rs->fetch_object()) {
 		$row->semanal_descrip = "";

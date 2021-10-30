@@ -203,7 +203,7 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 			cboPrestador.add(new qx.ui.form.ListItem(data.result[x].nombre, null, data.result[x].organismo_area_id));
 		}
 	});
-	rpc.callAsyncListeners(true, "autocompletarPrestador", {texto: ""});
+	rpc.callAsyncListeners(true, "autocompletarPrestador", {texto: "", prestador_tipo: "acd"});
 	
 	
 	//var cboPrestador = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarPrestador"});
@@ -298,7 +298,7 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	var btnCambiarPrestador = new qx.ui.menu.Button("Cambiar prestador...");
 	btnCambiarPrestador.setEnabled(false);
 	btnCambiarPrestador.addListener("execute", function(e){
-		var win = new sacdiag.comp.windowSeleccionarPrestador();
+		var win = new sacdiag.comp.windowSeleccionarPrestador('acd');
 		win.setModal(true);
 		win.addListener("aceptado", function(e){
 			var data = e.getData();

@@ -1,7 +1,7 @@
 qx.Class.define("sacdiag.comp.windowPrestador",
 {
 	extend : componente.comp.ui.ramon.window.Window,
-	construct : function (rowData)
+	construct : function (rowData, prestador_tipo)
 	{
 	this.base(arguments);
 	
@@ -96,6 +96,7 @@ qx.Class.define("sacdiag.comp.windowPrestador",
 		if (form.validate()) {
 			var p = {};
 			p.model = qx.util.Serializer.toNativeObject(controllerForm.getModel());
+			p.prestador_tipo = prestador_tipo;
 			delete p.model.fecha_alta;
 			
 			//alert(qx.lang.Json.stringify(p, null, 2));
@@ -112,8 +113,6 @@ qx.Class.define("sacdiag.comp.windowPrestador",
 			}, this);
 			rpc.addListener("failed", function(e){
 				var data = e.getData();
-				
-				//alert(qx.lang.Json.stringify(data, null, 2));
 				
 				if (data.message == "descrip_duplicado") {
 					txtDescrip.focus();

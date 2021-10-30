@@ -1,7 +1,7 @@
 qx.Class.define("sacdiag.comp.windowSeleccionarPrestador",
 {
 	extend : componente.comp.ui.ramon.window.Window,
-	construct : function (rowData)
+	construct : function (prestador_tipo)
 	{
 	this.base(arguments);
 	
@@ -41,7 +41,7 @@ qx.Class.define("sacdiag.comp.windowSeleccionarPrestador",
 			slbPrestador.add(new qx.ui.form.ListItem(data.result[x].label, null, data.result[x].model));
 		}
 	});
-	rpc.callAsyncListeners(true, "autocompletarPrestador", {texto: ""});
+	rpc.callAsyncListeners(true, "autocompletarPrestador", {texto: "", prestador_tipo: prestador_tipo});
 	
 	
 	

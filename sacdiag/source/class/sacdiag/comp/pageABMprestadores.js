@@ -11,6 +11,7 @@ qx.Class.define("sacdiag.comp.pageABMprestadores",
 	
 	this.addListenerOnce("appear", function(e){
 		//cboTitulo.focus();
+		functionActualizarCalcular();
 	});
 	
 	
@@ -30,6 +31,9 @@ qx.Class.define("sacdiag.comp.pageABMprestadores",
 		
 		btnEstadoPrestacion.setEnabled(false);
 		menuPrestacion.memorizar([btnEstadoPrestacion]);
+		
+		btnAgregarRS.setEnabled(false);
+		menuRS.memorizar([btnAgregarRS]);
 		
 		tableModelRS.setDataAsMapArray([], true);
 		
@@ -54,6 +58,7 @@ qx.Class.define("sacdiag.comp.pageABMprestadores",
 		this.timerId = timer.start(function() {
 
 			var p = {};
+			p.prestador_tipo = slbPrestador.getSelection()[0].getModel();
 		
 			this.rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.Parametros");
 			this.rpc.addListener("completed", function(e){
@@ -185,6 +190,37 @@ qx.Class.define("sacdiag.comp.pageABMprestadores",
 	}
 	
 	
+	var functionActualizarCalcular = function() {
+		
+		txtTurnoSemanal_descrip.setValue('');
+		txtFechaSemanal_descrip.setValue('');
+		txtTurnoMensual_descrip.setValue('');
+		txtFechaMensual_descrip.setValue('');
+		
+		var p = {};
+		p.prestador_tipo = slbPrestador.getSelection()[0].getModel();
+		
+		var rpcSemanal = new sacdiag.comp.rpc.Rpc("services/", "comp.Parametros");
+		rpcSemanal.addListener("completed", function(e){
+			var data = e.getData();
+			
+			txtTurnoSemanal_descrip.setValue(data.result.nombre);
+			txtFechaSemanal_descrip.setValue(data.result.periodo_descrip);
+		});
+		rpcSemanal.callAsyncListeners(true, "calcular_turno_semanal", p);
+		
+		
+		var rpcMensual = new sacdiag.comp.rpc.Rpc("services/", "comp.Parametros");
+		rpcMensual.addListener("completed", function(e){
+			var data = e.getData();
+			
+			txtTurnoMensual_descrip.setValue(data.result.nombre);
+			txtFechaMensual_descrip.setValue(data.result.periodo_descrip);
+		});
+		rpcMensual.callAsyncListeners(true, "calcular_turno_mensual", p);		
+	}
+	
+	
 
 	
 	var compositePrestador = new qx.ui.container.Composite(new qx.ui.layout.Canvas());
@@ -195,6 +231,22 @@ qx.Class.define("sacdiag.comp.pageABMprestadores",
 	
 	
 	
+	var slbPrestador = new qx.ui.form.SelectBox();
+	slbPrestador.setWidth(200);
+	
+	slbPrestador.add(new qx.ui.form.ListItem('Alta Complejidad', null, 'acd'));
+	slbPrestador.add(new qx.ui.form.ListItem('Pañal y Leche', null, 'pl'));
+	
+	slbPrestador.addListener("changeSelection", function(e){
+		var data = e.getData();
+		
+		functionActualizarPrestador();
+		functionActualizarCalcular();
+	});
+	compositePrestador.add(slbPrestador, {left: 80, top: 0});
+	
+	compositePrestador.add(new qx.ui.basic.Label("Prestador tipo:"), {left: 0, top: 5});
+	
 	
 	
 	
@@ -203,7 +255,9 @@ qx.Class.define("sacdiag.comp.pageABMprestadores",
 
 	var btnAgregarPrestador = new qx.ui.menu.Button("Agregar...");
 	btnAgregarPrestador.addListener("execute", function(e){
-		var win = new sacdiag.comp.windowPrestador();
+		var prestador_tipo = slbPrestador.getSelection()[0].getModel();
+		
+		var win = new sacdiag.comp.windowPrestador(null, prestador_tipo);
 		win.setModal(true);
 		win.addListener("aceptado", function(e){
 			var data = e.getData();
@@ -307,9 +361,9 @@ qx.Class.define("sacdiag.comp.pageABMprestadores",
 		menuPrestador.memorizar([btnEditarPrestador]);
 	});
 
-	compositePrestador.add(tblPrestador, {left: 0, top: 20, right: 0, bottom: 110});
+	compositePrestador.add(tblPrestador, {left: 0, top: 30, right: 0, bottom: 110});
 	
-	compositePrestador.add(new qx.ui.basic.Label("Prestador"), {left: 0, top: 0});
+	
 	
 	
 	
@@ -728,28 +782,6 @@ qx.Class.define("sacdiag.comp.pageABMprestadores",
 	functionActualizarPrestador();
 	
 	
-	
-	var rpcSemanal = new sacdiag.comp.rpc.Rpc("services/", "comp.Parametros");
-	rpcSemanal.addListener("completed", function(e){
-		var data = e.getData();
-		
-		txtTurnoSemanal_descrip.setValue(data.result.nombre);
-		txtFechaSemanal_descrip.setValue(data.result.periodo_descrip);
-	});
-	rpcSemanal.callAsyncListeners(true, "calcular_turno_semanal");
-	
-	
-	var rpcMensual = new sacdiag.comp.rpc.Rpc("services/", "comp.Parametros");
-	rpcMensual.addListener("completed", function(e){
-		var data = e.getData();
-		
-		txtTurnoMensual_descrip.setValue(data.result.nombre);
-		txtFechaMensual_descrip.setValue(data.result.periodo_descrip);
-	});
-	rpcMensual.callAsyncListeners(true, "calcular_turno_mensual");
-	
-	
-		
 	},
 	members : 
 	{
