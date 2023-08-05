@@ -9,6 +9,10 @@ class class_WebServices
 	private $ne = [
 		'IdAutorizacion',	
 		'IdInternado',
+		'idtramiteprincipal',
+		'idtramitetarjetareimpresa',
+		'idciudadano',
+		'codigoError',
 	];
 	
 	private $t = [
@@ -33,6 +37,37 @@ class class_WebServices
 		'FechaHoraAlta' => 'Fecha alta',
 		'TipoAlta' => 'Tipo alta',
 		'Diagnostico' => 'Diagnóstico',
+		
+		'apellido' => 'Apellido',
+		'nombres' => 'Nombres',
+		'fechaNacimiento' => 'Fecha nacimiento',
+		'cuil' => 'CUIL',
+		'calle' => 'Calle',
+		'numero' => 'Numero',
+		'piso' => 'Piso',
+		'departamento' => 'Departamento',
+		'cpostal' => 'Cod.postal',
+		'barrio' => 'Barrio',
+		'monoblock' => 'Monoblock',
+		'ciudad' => 'Ciudad',
+		'municipio' => 'Municipio',
+		'provincia' => 'Provincia',
+		'pais' => 'Pais',
+		
+		'ejemplar' => 'Ejemplar',
+		'vencimiento' => 'Vencimiento',
+		'fechaConsulta' => 'Fecha consulta',
+		'descripcionError' => 'Descripción consulta',
+		'numeroDocumento' => 'Numero documento',
+		'sexo' => 'Sexo',
+		'mensaf' => 'Mensaje fallecimiento',
+		'origenf' => 'Origen fallecimiento',
+		'fechaf' => 'Fecha fallecimiento',
+		
+		'data' => 'Coberturas',
+		'rnos' => 'Código RNOS',
+		'cobertura' => 'Cobertura',
+		'servicio' => 'Servicio',
 	];
 	
 	
@@ -145,11 +180,13 @@ class class_WebServices
   	$resultado = new stdClass;
 	
 	//webService
-	$url = 'http://app.iosep.gob.ar/WsHospitales/api/PUCO?DNI=' . $p->dni;
+	$url = 'https://mpi.msalsgo.gob.ar/renaper.php?token=y8M$0lLk1Dv6*qFzO@J7bGs4RmP2nThXwE9VcU3oNt!eA%BxW5rS&dni='.$p->dni.'&sexo=' . $p->sexo;
+	
+	//$url = 'https://mpi.msalsgo.gob.ar/coberturas.php?token=y8M$0lLk1Dv6*qFzO@J7bGs4RmP2nThXwE9VcU3oNt!eA%BxW5rS&dni='.$p->dni.'&sexo=' . $p->sexo;
 
 	$curl = curl_init();
 	/*******************************************OPCIONES*************************/
-	curl_setopt($curl, CURLOPT_POST, 1);
+	//curl_setopt($curl, CURLOPT_POST, 1);
 	//curl_setopt($curl, CURLOPT_POSTFIELDS, $data); //si requiere autenticación
 	curl_setopt($curl, CURLOPT_URL, $url);
 	/*
@@ -164,17 +201,26 @@ class class_WebServices
 	/*******************************************EJECUCION************************/
 	$result = curl_exec($curl);
 	$datos = json_decode($result);
-
-	curl_close($curl);
-
-	//$datos = simplexml_load_string($result);
 	
-	$resultado->datos = $datos;
-	if ($datos->error == true) {
-		$resultado->texto.= chr(13) . $datos->mensaje;
+	if ($datos->successful && $datos->statusCode == 200) {
+		$resultado->texto = json_encode($datos);
+		$resultado->datos = $datos->data[0];
+		
+		$url = 'https://mpi.msalsgo.gob.ar/coberturas.php?token=y8M$0lLk1Dv6*qFzO@J7bGs4RmP2nThXwE9VcU3oNt!eA%BxW5rS&dni='.$p->dni.'&sexo=' . $p->sexo;
+		curl_setopt($curl, CURLOPT_URL, $url);
+		
+		$result = curl_exec($curl);
+		$datos = json_decode($result);
+		if ($datos->successful && $datos->statusCode == 200) {
+			$resultado->datos->data = $datos->data;
+			
+			$render = implode(chr(13), $this->render($resultado->datos, 0));
+			$resultado->texto = chr(13) . $render;
+		} else {
+			$resultado->texto = chr(13) . implode(chr(13), $datos->data);
+		}
 	} else {
-		$render = implode(chr(13), $this->render($datos, 0));
-		$resultado->texto = chr(13) . $render;		
+		$resultado->texto = chr(13) . implode(chr(13), $datos->data);
 	}
 	
 	return $resultado;

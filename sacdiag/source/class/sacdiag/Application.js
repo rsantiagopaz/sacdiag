@@ -333,7 +333,7 @@ qx.Class.define("sacdiag.Application",
 	
 	var btnWebServices = new qx.ui.menu.Button("Web services...");
 	btnWebServices.addListener("execute", function(){
-		var win = new sacdiag.comp.windowWebService("");
+		var win = new sacdiag.comp.windowWebService('');
 		win.setModal(true);
 		doc.add(win);
 		win.center();

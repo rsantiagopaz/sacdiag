@@ -111,6 +111,7 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 			//alert(qx.lang.Json.stringify(p, null, 2));
 			
 			this.rpc = new sacdiag.comp.rpc.Rpc("services/", "comp.Solicitudes");
+			this.rpc.setTimeout(20000);
 			this.rpc.addListener("completed", function(e){
 				var data = e.getData();
 				
@@ -458,7 +459,9 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	
 	var btnWebServices = new qx.ui.menu.Button("consultar Web services...");
 	btnWebServices.addListener("execute", function(e){
-		var win = new sacdiag.comp.windowWebService(rowDataSolicitud.persona_dni);
+		var sexos = {'F': 1, 'M': 2};
+		var sexo = sexos[rowDataSolicitud.persona_sexo] ? sexos[rowDataSolicitud.persona_sexo] : 3;
+		var win = new sacdiag.comp.windowWebService(rowDataSolicitud.persona_dni, sexo);
 		win.setModal(true);
 		application.getRoot().add(win);
 		win.center();

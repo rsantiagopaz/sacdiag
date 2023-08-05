@@ -23,7 +23,7 @@ class class_Solicitudes extends class_Base
 	
 	$resultado = array();
 	
-	$sql = "SELECT solicitudes.id_solicitud, solicitudes.fecha_emite, solicitudes.estado, solicitudes.id_efector_publico, solicitudes.id_prestador_fantasia, _personas.persona_id, _personas.persona_nombre, _personas.persona_dni FROM solicitudes INNER JOIN _personas USING(persona_id) WHERE TRUE";
+	$sql = "SELECT solicitudes.id_solicitud, solicitudes.fecha_emite, solicitudes.estado, solicitudes.id_efector_publico, solicitudes.id_prestador_fantasia, _personas.persona_id, _personas.persona_nombre, _personas.persona_dni, _personas.persona_sexo FROM solicitudes INNER JOIN _personas USING(persona_id) WHERE TRUE";
 	
 	if (! is_null($p->desde) && ! is_null($p->hasta)) {
 		$sql.= " AND (fecha_emite BETWEEN '" . substr($p->desde, 0, 10) . "' AND '" . substr($p->hasta, 0, 10) . "')";
