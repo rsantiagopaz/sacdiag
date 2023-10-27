@@ -19,24 +19,24 @@ class class_WebServices
 		'NombreAfiliado' => 'Nombre afiliado',	
 		'A_Numero' => 'Af.numero',
 		
-		'Practicas' => 'Prácticas',
-		'TipoPractica' => 'Tipo práctica',
+		'Practicas' => 'Practicas',
+		'TipoPractica' => 'Tipo practica',
 		'Prescriptor' => 'Prescriptor',
-		'Numero' => 'Número',
-		'FechaEmision' => 'Fecha emisión',
+		'Numero' => 'Numero',
+		'FechaEmision' => 'Fecha emision',
 		'Observaciones' => 'Observaciones',
 		'PracticaDetalle' => 'Detalle',
-		'Codigo' => 'Código',
-		'Practica' => 'Práctica',
+		'Codigo' => 'Codigo',
+		'Practica' => 'Practica',
 		'Cantidad' => 'Cantidad',
 		
 		'DetallesInternaciones' => 'Internaciones',
-		'Clinica' => 'Clínica',
+		'Clinica' => 'Clinica',
 		'EstadoInternacion' => 'Estado internacion',
 		'FechaHoraInternacion' => 'Fecha internacion',
 		'FechaHoraAlta' => 'Fecha alta',
 		'TipoAlta' => 'Tipo alta',
-		'Diagnostico' => 'Diagnóstico',
+		'Diagnostico' => 'Diagnostico',
 		
 		'apellido' => 'Apellido',
 		'nombres' => 'Nombres',
@@ -57,7 +57,7 @@ class class_WebServices
 		'ejemplar' => 'Ejemplar',
 		'vencimiento' => 'Vencimiento',
 		'fechaConsulta' => 'Fecha consulta',
-		'descripcionError' => 'Descripción consulta',
+		'descripcionError' => 'Descripcion consulta',
 		'numeroDocumento' => 'Numero documento',
 		'sexo' => 'Sexo',
 		'mensaf' => 'Mensaje fallecimiento',
@@ -65,7 +65,7 @@ class class_WebServices
 		'fechaf' => 'Fecha fallecimiento',
 		
 		'data' => 'Coberturas',
-		'rnos' => 'Código RNOS',
+		'rnos' => 'Codigo RNOS',
 		'cobertura' => 'Cobertura',
 		'servicio' => 'Servicio',
 	];
@@ -77,7 +77,7 @@ class class_WebServices
   	$resultado = new stdClass;
 	
 	//webService
-	$url = 'http://app.iosep.gob.ar/WsHospitales/api/Practicas?DNI=' . $p->dni;
+	$url = 'https://app.iosep.gob.ar/WsHospitales/api/Practicas?DNI=' . $p->dni;
 
 	$curl = curl_init();
 	/*******************************************OPCIONES*************************/
@@ -95,6 +95,10 @@ class class_WebServices
 
 	/*******************************************EJECUCION************************/
 	$result = curl_exec($curl);
+	if (curl_errno($curl)) {
+		$resultado->texto = curl_error($curl);
+		return $resultado;
+	}
 	$datos = json_decode($result);
 
 	curl_close($curl);
@@ -125,7 +129,7 @@ class class_WebServices
 	  				$texto[] = '';
 	  			}
 	  		} else {
-	  			$texto[] = str_repeat(' ', $level * 7) . $t . $value;
+	  			$texto[] = str_repeat(' ', $level * 7) . htmlentities($t) . htmlentities($value);
 	  		}
   		}
   	}
@@ -139,7 +143,7 @@ class class_WebServices
   	$resultado = new stdClass;
 	
 	//webService
-	$url = 'http://app.iosep.gob.ar/WsHospitales/api/Internados?DNI=' . $p->dni;
+	$url = 'https://app.iosep.gob.ar/WsHospitales/api/Internados?DNI=' . $p->dni;
 
 	$curl = curl_init();
 	/*******************************************OPCIONES*************************/
@@ -157,6 +161,10 @@ class class_WebServices
 
 	/*******************************************EJECUCION************************/
 	$result = curl_exec($curl);
+	if (curl_errno($curl)) {
+		$resultado->texto = curl_error($curl);
+		return $resultado;
+	}
 	$datos = json_decode($result);
 
 	curl_close($curl);
@@ -180,7 +188,7 @@ class class_WebServices
   	$resultado = new stdClass;
 	
 	//webService
-	$url = 'https://mpi.msalsgo.gob.ar/renaper.php?token=y8M$0lLk1Dv6*qFzO@J7bGs4RmP2nThXwE9VcU3oNt!eA%BxW5rS&dni='.$p->dni.'&sexo=' . $p->sexo;
+	$url = 'http://mpi.msalsgo.gob.ar/renaper.php?token=y8M$0lLk1Dv6*qFzO@J7bGs4RmP2nThXwE9VcU3oNt!eA%BxW5rS&dni=' . $p->dni . '&sexo=' . $p->sexo;
 	
 	//$url = 'https://mpi.msalsgo.gob.ar/coberturas.php?token=y8M$0lLk1Dv6*qFzO@J7bGs4RmP2nThXwE9VcU3oNt!eA%BxW5rS&dni='.$p->dni.'&sexo=' . $p->sexo;
 
@@ -200,13 +208,17 @@ class class_WebServices
 
 	/*******************************************EJECUCION************************/
 	$result = curl_exec($curl);
+	if (curl_errno($curl)) {
+		$resultado->texto = curl_error($curl);
+		return $resultado;
+	}
 	$datos = json_decode($result);
 	
 	if ($datos->successful && $datos->statusCode == 200) {
 		$resultado->texto = json_encode($datos);
 		$resultado->datos = $datos->data[0];
 		
-		$url = 'https://mpi.msalsgo.gob.ar/coberturas.php?token=y8M$0lLk1Dv6*qFzO@J7bGs4RmP2nThXwE9VcU3oNt!eA%BxW5rS&dni='.$p->dni.'&sexo=' . $p->sexo;
+		$url = 'http://mpi.msalsgo.gob.ar/coberturas.php?token=y8M$0lLk1Dv6*qFzO@J7bGs4RmP2nThXwE9VcU3oNt!eA%BxW5rS&dni='.$p->dni.'&sexo=' . $p->sexo;
 		curl_setopt($curl, CURLOPT_URL, $url);
 		
 		$result = curl_exec($curl);
@@ -220,7 +232,7 @@ class class_WebServices
 			$resultado->texto = chr(13) . implode(chr(13), $datos->data);
 		}
 	} else {
-		$resultado->texto = chr(13) . implode(chr(13), $datos->data);
+		$resultado->texto = chr(13) . ($datos->message ? $datos->message : json_encode($datos));
 	}
 	
 	return $resultado;
@@ -391,4 +403,3 @@ class class_WebServices
 //$datos = puco();
 //print_r($datos);
 ?>
-
