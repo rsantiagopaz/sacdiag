@@ -1,0 +1,64 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "generate distclean",
+        "type": "shell",
+        "command": "D:\\Python27\\python.exe",
+        "args": [
+          "generate.py",
+          "distclean"
+        ],
+        "group": "none",
+        "presentation": {
+          "reveal": "always"
+        },
+        "problemMatcher": []
+      },      
+      {
+        "label": "run source",
+        "type": "shell",
+        "command": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+        "args": [
+          "localhost/openworks-qx/5.x/sacdiag/sacdiag/source/"
+        ],
+        "group": "none",
+        "presentation": {
+          "reveal": "never"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "generate source-all",
+        "type": "shell",
+        "command": "D:\\Python27\\python.exe",
+        "args": [
+          "generate.py",
+          "source-all"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "generate build",
+        "type": "shell",
+        "command": "D:\\Python27\\python.exe",
+        "args": [
+          "generate.py",
+          "build"
+        ],
+        "group": "build",
+        "presentation": {
+          "reveal": "always"
+        }
+      }
+    ]
+}

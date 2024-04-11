@@ -79,6 +79,7 @@ class class_Solicitudes extends class_Base
 	
   	$opciones = new stdClass;
   	$opciones->valor = "float";
+	$opciones->cantidad = "int";
 	
 	$sql = "SELECT";
 	$sql.= "  solicitudes_prestaciones.*";

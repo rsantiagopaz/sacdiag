@@ -45,7 +45,7 @@ qx.Class.define("sacdiag.comp.windowMVademecum",
 	form.add(txtDescrip, "Descripción", null, "descripcion");
 	
 	
-	var txtPrecio = new qx.ui.form.Spinner(0, 0, 100000);
+	var txtPrecio = new qx.ui.form.Spinner(0, 0, 1000000000000);
 	txtPrecio.setNumberFormat(application.numberformatMontoEn);
 	txtPrecio.setMaxWidth(100);
 	txtPrecio.getChildControl("upbutton").setVisibility("excluded");

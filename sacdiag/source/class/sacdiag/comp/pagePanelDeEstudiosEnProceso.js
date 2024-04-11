@@ -699,7 +699,7 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	
 	
 	var tableModelPrestacion = new qx.ui.table.model.Simple();
-	tableModelPrestacion.setColumns(["Código", "Descripción"], ["codigo", "denominacion"]);
+	tableModelPrestacion.setColumns(["Código", "Cantidad", "Descripción"], ["codigo", "cantidad", "denominacion"]);
 	tableModelPrestacion.addListener("dataChanged", function(e){
 		var rowCount = tableModelPrestacion.getRowCount();
 		
@@ -720,9 +720,9 @@ qx.Class.define("sacdiag.comp.pagePanelDeEstudiosEnProceso",
 	
 	var resizeBehaviorPrestacion = tableColumnModelPrestacion.getBehavior();
 
-	resizeBehaviorPrestacion.set(0, {width:"30%", minWidth:100});
-	resizeBehaviorPrestacion.set(1, {width:"70%", minWidth:100});
-	//resizeBehaviorPrestacion.set(2, {width:"60%", minWidth:100});
+	resizeBehaviorPrestacion.set(0, {width:"20%", minWidth:100});
+	resizeBehaviorPrestacion.set(1, {width:"10%", minWidth:100});
+	resizeBehaviorPrestacion.set(2, {width:"70%", minWidth:100});
 
 	
 	
